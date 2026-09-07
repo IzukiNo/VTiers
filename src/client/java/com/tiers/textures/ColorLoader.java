@@ -37,26 +37,36 @@ public class ColorLoader implements ResourceReloader {
             }
             return null;
         }, prepareExecutor).thenCompose(reloadSynchronizer::whenPrepared).thenAcceptAsync(jsonObject -> {
-            if (jsonObject != null) {
-                ColorControl.updateColors(jsonObject);
-                TiersClient.restyleAllTexts(TiersClient.playerProfiles);
-                TiersClient.updateAllTags();
-            }
+            try {
+                if (jsonObject != null) {
+                    ColorControl.updateColors(jsonObject);
+                    TiersClient.restyleAllTexts(TiersClient.playerProfiles);
+                    TiersClient.updateAllTags();
+                }
 
-            if (ConfigScreen.ownProfile == null) {
-                ConfigScreen.ownProfile = new PlayerProfile(MinecraftClient.getInstance().getGameProfile().name(), false);
-                PlayerProfileQueue.putFirstInQueue(ConfigScreen.ownProfile);
+                if (ConfigScreen.ownProfile == null) {
+                    String ownName = null;
+                    if (MinecraftClient.getInstance() != null && MinecraftClient.getInstance().getGameProfile() != null) {
+                        ownName = MinecraftClient.getInstance().getGameProfile().name();
+                    }
+                    if (ownName != null && !ownName.isEmpty()) {
+                        ConfigScreen.ownProfile = new PlayerProfile(ownName, false);
+                        PlayerProfileQueue.putFirstInQueue(ConfigScreen.ownProfile);
+                    }
 
-                String defaultProfileMojang = loadStringFromResources("json/defaultProfileMojang.json");
-                String defaultProfileVNList = loadStringFromResources("json/defaultProfileVNList.json");
+                    String defaultProfileMojang = loadStringFromResources("json/defaultProfileMojang.json");
+                    String defaultProfileVNList = loadStringFromResources("json/defaultProfileVNList.json");
 
-                ConfigScreen.defaultProfile = new PlayerProfile(defaultProfileMojang, defaultProfileVNList);
+                    ConfigScreen.defaultProfile = new PlayerProfile(defaultProfileMojang, defaultProfileVNList);
 
-            } else {
-                ArrayList<PlayerProfile> configProfiles = new ArrayList<>();
-                configProfiles.add(ConfigScreen.defaultProfile);
-                configProfiles.add(ConfigScreen.ownProfile);
-                TiersClient.restyleAllTexts(configProfiles);
+                } else {
+                    ArrayList<PlayerProfile> configProfiles = new ArrayList<>();
+                    if (ConfigScreen.defaultProfile != null) configProfiles.add(ConfigScreen.defaultProfile);
+                    if (ConfigScreen.ownProfile != null) configProfiles.add(ConfigScreen.ownProfile);
+                    TiersClient.restyleAllTexts(configProfiles);
+                }
+            } catch (Exception e) {
+                LOGGER.error("Error applying color resource reload", e);
             }
         }, applyExecutor);
     }

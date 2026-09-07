@@ -71,6 +71,15 @@ public class PlayerProfile {
     private static boolean forceNewRequest;
 
     public PlayerProfile(String name, boolean regular) {
+        this.regular = regular;
+        if (name == null || name.isEmpty()) {
+            this.name = "";
+            this.inGameName = "";
+            this.targetName = "";
+            this.status = Status.NOT_PLAYER;
+            return;
+        }
+
         if (name.contains("-force")) {
             String[] content = name.split("-");
             if (content.length == 2) {
@@ -80,7 +89,6 @@ public class PlayerProfile {
         }
 
         playerProfilesRequests.incrementAndGet();
-        this.regular = regular;
         this.name = name;
         inGameName = name;
         targetName = name;
@@ -91,7 +99,7 @@ public class PlayerProfile {
     public PlayerProfile(String mojangJson, String jsonPvPTiers) {
         regular = false;
 
-        if (JsonParser.parseString(mojangJson).isJsonNull()) {
+        if (mojangJson == null || mojangJson.isEmpty() || JsonParser.parseString(mojangJson).isJsonNull()) {
             status = Status.API_ISSUE;
             failedRequest();
             return;
@@ -109,13 +117,17 @@ public class PlayerProfile {
 
         Path path = FabricLoader.getInstance().getGameDir().resolve("cache/tiers/06ec3577329945fabbdf613b1f86c8ab.png");
 
-        try (InputStream inputStream = MinecraftClient.getInstance().getResourceManager().getResource(Identifier.of("minecraft", "textures/default.png")).orElseThrow().getInputStream()) {
-            if (inputStream == null)
-                throw new IOException();
-
-            Files.createDirectories(path.getParent());
-            Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
-        } catch (IOException ignored) {
+        try {
+            var resourceOpt = MinecraftClient.getInstance().getResourceManager().getResource(Identifier.of("minecraft", "textures/default.png"));
+            if (resourceOpt.isPresent()) {
+                try (InputStream inputStream = resourceOpt.get().getInputStream()) {
+                    if (inputStream != null) {
+                        Files.createDirectories(path.getParent());
+                        Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                }
+            }
+        } catch (Exception ignored) {
             LOGGER.warn("Error copying default skin");
         }
 

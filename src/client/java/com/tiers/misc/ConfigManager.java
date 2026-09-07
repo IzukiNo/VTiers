@@ -26,7 +26,7 @@ public class ConfigManager {
     private static int launchTickCounter;
 
     static {
-        FabricLoader.getInstance().getModContainer("tiers").ifPresent(tiers -> version = tiers.getMetadata().getVersion().getFriendlyString());
+        FabricLoader.getInstance().getModContainer("vtiers").or(() -> FabricLoader.getInstance().getModContainer("tiers")).ifPresent(tiers -> version = tiers.getMetadata().getVersion().getFriendlyString());
     }
 
     private static class Config {

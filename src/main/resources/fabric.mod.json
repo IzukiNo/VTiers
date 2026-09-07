@@ -12,6 +12,8 @@
   },
   "custom": {
     "modmenu": {
+      "summary": "Display PvP tiers in Minecraft.",
+      "description": "VTiers displays player PvP tiers directly in-game, powered by VNList.",
       "links": {
         "GitHub": "https://github.com/IzukiNo/VTiers",
         "Modrinth page": "https://modrinth.com/mod/vtiers",

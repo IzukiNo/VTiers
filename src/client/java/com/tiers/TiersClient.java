@@ -84,7 +84,7 @@ public class TiersClient implements ClientModInitializer {
         clearCache(true);
         CommandRegister.registerCommands();
 
-        Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer("tiers");
+        Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer("vtiers").or(() -> FabricLoader.getInstance().getModContainer("tiers"));
 
         modContainer.ifPresent(tiers -> {
             ResourceLoader.registerBuiltinPack(Identifier.of("resourcepacks", "tiers-resources"), tiers, Text.of("Resources for Tiers"), PackActivationType.ALWAYS_ENABLED);
@@ -364,7 +364,7 @@ public class TiersClient implements ClientModInitializer {
         debugInfo[3] = ConfigManager.getCurrentConfig();
 
         final String[] version = new String[1];
-        FabricLoader.getInstance().getModContainer("tiers").ifPresent(tiers -> version[0] = "Tiers version: " + tiers.getMetadata().getVersion().getFriendlyString());
+        FabricLoader.getInstance().getModContainer("vtiers").or(() -> FabricLoader.getInstance().getModContainer("tiers")).ifPresent(tiers -> version[0] = "Tiers version: " + tiers.getMetadata().getVersion().getFriendlyString());
         debugInfo[0] = version[0] + "\n";
         debugInfo[1] = debugInfo[0];
         debugInfo[1] += "Launcher brand: " + MinecraftClient.getLauncherBrand() + "\n";
