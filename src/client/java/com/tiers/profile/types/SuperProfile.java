@@ -31,6 +31,12 @@ public class SuperProfile {
     public static final AtomicInteger failedPvPTiersRequests = new AtomicInteger(0);
     public static final AtomicInteger failedPvPTiersRequestsLastMinute = new AtomicInteger(0);
     public static boolean isPvPTiersDown = false;
+
+    public static final AtomicInteger VNListRequests = new AtomicInteger(0);
+    public static final AtomicInteger failedVNListRequests = new AtomicInteger(0);
+    public static final AtomicInteger failedVNListRequestsLastMinute = new AtomicInteger(0);
+    public static boolean isVNListDown = false;
+
     public static int numberOfMessages;
 
     public Status status = Status.SEARCHING;
@@ -59,6 +65,8 @@ public class SuperProfile {
     protected SuperProfile() {
         if (this instanceof PvPTiersProfile)
             PvPTiersRequests.incrementAndGet();
+        else if (this instanceof VNListProfile)
+            VNListRequests.incrementAndGet();
     }
 
     static {
@@ -68,14 +76,18 @@ public class SuperProfile {
 
     private static void updateDownStatus() {
         isPvPTiersDown = failedPvPTiersRequestsLastMinute.get() > 3;
+        isVNListDown = failedVNListRequestsLastMinute.get() > 3;
     }
 
     private static void updateAndRecoverFailedRequests() {
         failedPvPTiersRequestsLastMinute.set(0);
+        failedVNListRequestsLastMinute.set(0);
 
         for (SuperProfile superProfile : SuperProfile.failedSuperProfiles) {
 
             if (superProfile instanceof PvPTiersProfile && isPvPTiersDown)
+                continue;
+            if (superProfile instanceof VNListProfile && isVNListDown)
                 continue;
 
             SuperProfile.failedSuperProfiles.remove(superProfile);
@@ -96,6 +108,9 @@ public class SuperProfile {
         if (this instanceof PvPTiersProfile) {
             PvPTiersRequests.incrementAndGet();
             failedPvPTiersRequests.decrementAndGet();
+        } else if (this instanceof VNListProfile) {
+            VNListRequests.incrementAndGet();
+            failedVNListRequests.decrementAndGet();
         }
     }
 
@@ -152,6 +167,30 @@ public class SuperProfile {
         }
 
         JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
+
+        if (jsonObject.has("success") && jsonObject.has("data") && jsonObject.get("data").isJsonObject()) {
+            JsonObject data = jsonObject.getAsJsonObject("data");
+            region = "VN";
+            points = data.has("point") ? data.get("point").getAsInt() : (data.has("points") ? data.get("points").getAsInt() : 0);
+            overallPosition = data.has("overall") ? data.get("overall").getAsInt() : 0;
+
+            displayedRegion = getRegionText();
+            regionTooltip = getRegionTooltip();
+            displayedOverall = getOverallText();
+            overallTooltip = getOverallTooltip();
+
+            if (data.has("ranks") && data.get("ranks").isJsonObject())
+                parseRankings(data.getAsJsonObject("ranks"));
+            else if (data.has("rankings") && data.get("rankings").isJsonObject())
+                parseRankings(data.getAsJsonObject("rankings"));
+
+            status = Status.READY;
+            originalJson = json;
+
+            if (onUpdate != null)
+                onUpdate.run();
+            return;
+        }
 
         if (jsonObject.has("name") && jsonObject.has("region") &&
                 jsonObject.has("points") && jsonObject.has("overall") && jsonObject.has("rankings") && jsonObject.get("rankings").isJsonObject()) {
@@ -231,6 +270,8 @@ public class SuperProfile {
             return Icons.colorText(region, "af");
         else if (region.equalsIgnoreCase("OC"))
             return Icons.colorText(region, "oc");
+        else if (region.equalsIgnoreCase("VN"))
+            return Icons.colorText(region, "as");
         return Icons.colorText("Unknown", "unknown");
     }
 
@@ -251,13 +292,15 @@ public class SuperProfile {
             return Icons.colorText("Africa", "af");
         else if (region.equalsIgnoreCase("OC"))
             return Icons.colorText("Oceania", "oc");
+        else if (region.equalsIgnoreCase("VN"))
+            return Icons.colorText("Vietnam", "as");
         return Icons.colorText("Unknown", "unknown");
     }
 
     private Text getOverallText() {
         String positionString = "#" + overallPosition;
-        if (!(this instanceof PvPTiersProfile) && points >= 250) return Icons.colorText(positionString, "master");
-        else if (this instanceof PvPTiersProfile && points >= 200) return Icons.colorText(positionString, "master");
+        if (!(this instanceof PvPTiersProfile) && !(this instanceof VNListProfile) && points >= 250) return Icons.colorText(positionString, "master");
+        else if ((this instanceof PvPTiersProfile || this instanceof VNListProfile) && points >= 200) return Icons.colorText(positionString, "master");
         else if (points >= 100) return Icons.colorText(positionString, "ace");
         else if (points >= 50) return Icons.colorText(positionString, "specialist");
         else if (points >= 20) return Icons.colorText(positionString, "cadet");
@@ -269,9 +312,9 @@ public class SuperProfile {
     private Text getOverallTooltip() {
         String overallTooltip = "Combat ";
 
-        if (!(this instanceof PvPTiersProfile) && points >= 400) overallTooltip += "Grandmaster";
-        else if (!(this instanceof PvPTiersProfile) && points >= 250) overallTooltip += "Master";
-        else if (this instanceof PvPTiersProfile && points >= 200) overallTooltip += "Master";
+        if (!(this instanceof PvPTiersProfile) && !(this instanceof VNListProfile) && points >= 400) overallTooltip += "Grandmaster";
+        else if (!(this instanceof PvPTiersProfile) && !(this instanceof VNListProfile) && points >= 250) overallTooltip += "Master";
+        else if ((this instanceof PvPTiersProfile || this instanceof VNListProfile) && points >= 200) overallTooltip += "Master";
         else if (points >= 100) overallTooltip += "Ace";
         else if (points >= 50) overallTooltip += "Specialist";
         else if (points >= 20) overallTooltip += "Cadet";
@@ -289,6 +332,10 @@ public class SuperProfile {
                 failedPvPTiersRequestsLastMinute.incrementAndGet();
                 if (failedPvPTiersRequests.incrementAndGet() % 20 == 0)
                     message = "[Tiers] PvPTiers might be down. " + failedPvPTiersRequests + " searches (out of " + PvPTiersRequests + ") failed so far. Use '/tiers -status' for more info";
+            } else if (this instanceof VNListProfile) {
+                failedVNListRequestsLastMinute.incrementAndGet();
+                if (failedVNListRequests.incrementAndGet() % 20 == 0)
+                    message = "[Tiers] VNList might be down. " + failedVNListRequests + " searches (out of " + VNListRequests + ") failed so far. Use '/tiers -status' for more info";
             }
         }
 
@@ -311,6 +358,9 @@ public class SuperProfile {
         if (this instanceof PvPTiersProfile) {
             message[0] = "PvPTiers might be down";
             message[1] = failedPvPTiersRequests + " searches (out of " + PvPTiersRequests + " profiles) failed so far";
+        } else if (this instanceof VNListProfile) {
+            message[0] = "VNList might be down";
+            message[1] = failedVNListRequests + " searches (out of " + VNListRequests + " profiles) failed so far";
         }
 
         message[2] = "Tiers will automatically try to update all failed requests";
@@ -321,6 +371,8 @@ public class SuperProfile {
         synchronized (SuperProfile.class) {
             PvPTiersRequests.set(0);
             failedPvPTiersRequests.set(0);
+            VNListRequests.set(0);
+            failedVNListRequests.set(0);
         }
     }
 

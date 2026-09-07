@@ -40,7 +40,16 @@ public enum Mode {
     SUBTIERS_BOW(Category.SUBTIERS, "\uF008", "Bow"),
     SUBTIERS_BED(Category.SUBTIERS, "\uF009", "Bed"),
     SUBTIERS_OG_VANILLA(Category.SUBTIERS, "\uF00A", "OG Vanilla"),
-    SUBTIERS_TRIDENT(Category.SUBTIERS, "\uF00B", "Trident");
+    SUBTIERS_TRIDENT(Category.SUBTIERS, "\uF00B", "Trident"),
+
+    VNLIST_VANILLA(Category.VNLIST, "\uF000", "Vanilla"),
+    VNLIST_SWORD(Category.VNLIST, "\uF005", "Sword"),
+    VNLIST_UHC(Category.VNLIST, "\uF001", "UHC"),
+    VNLIST_POT(Category.VNLIST, "\uF002", "Pot"),
+    VNLIST_NETHOP(Category.VNLIST, "\uF003", "Neth Op"),
+    VNLIST_SMP(Category.VNLIST, "\uF004", "Smp"),
+    VNLIST_AXE(Category.VNLIST, "\uF006", "Axe"),
+    VNLIST_MACE(Category.VNLIST, "\uF007", "Mace");
 
     private final Category category;
     private final String unicode;
@@ -55,7 +64,8 @@ public enum Mode {
     public enum Category {
         MCTIERS,
         PVPTIERS,
-        SUBTIERS
+        SUBTIERS,
+        VNLIST
     }
 
     public Text getIcon() {
@@ -63,6 +73,7 @@ public enum Mode {
             case MCTIERS -> Icons.identifierMCTiers;
             case PVPTIERS -> Icons.identifierPvPTiers;
             case SUBTIERS -> Icons.identifierSubtiers;
+            case VNLIST -> Icons.identifierVNList;
         };
         return Text.literal(unicode).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(identifier)).withColor(Colors.WHITE));
     }
@@ -72,6 +83,7 @@ public enum Mode {
             case MCTIERS -> Icons.identifierMCTiersTags;
             case PVPTIERS -> Icons.identifierPvPTiersTags;
             case SUBTIERS -> Icons.identifierSubtiersTags;
+            case VNLIST -> Icons.identifierVNListTags;
         };
         return Text.literal(unicode).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(identifier)).withColor(Colors.WHITE));
     }
@@ -90,5 +102,9 @@ public enum Mode {
 
     public static Mode[] getSubtiersValues() {
         return Arrays.stream(values()).filter(mode -> mode.toString().contains("SUBTIERS")).toArray(Mode[]::new);
+    }
+
+    public static Mode[] getVNListValues() {
+        return Arrays.stream(values()).filter(mode -> mode.toString().contains("VNLIST")).toArray(Mode[]::new);
     }
 }

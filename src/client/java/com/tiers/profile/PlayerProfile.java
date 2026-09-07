@@ -6,6 +6,7 @@ import com.tiers.TiersClient;
 import com.tiers.misc.Mode;
 import com.tiers.profile.types.PvPTiersProfile;
 import com.tiers.profile.types.SuperProfile;
+import com.tiers.profile.types.VNListProfile;
 import com.tiers.textures.ColorControl;
 import com.tiers.textures.Icons;
 import net.fabricmc.loader.api.FabricLoader;
@@ -54,6 +55,7 @@ public class PlayerProfile {
     public String uuid = "";
 
     public PvPTiersProfile profilePvPTiers;
+    public VNListProfile profileVNList;
 
     public Text toAppendLeft = Text.empty();
     public Text toAppendRight = Text.empty();
@@ -118,6 +120,7 @@ public class PlayerProfile {
         }
 
         profilePvPTiers = new PvPTiersProfile(jsonPvPTiers);
+        profileVNList = new VNListProfile(jsonPvPTiers);
 
         status = Status.READY;
     }
@@ -314,10 +317,15 @@ public class PlayerProfile {
             if (mode != 0)
                 TiersClient.showUpdatedPlayerProfile(this, false);
 
-            if (mode == 0 || mode == 2)
+            if (mode == 0 || mode == 2) {
+                profileVNList = new VNListProfile("https://api.vnlist.asia/v2/user/", uuid, extra);
                 profilePvPTiers = new PvPTiersProfile("https://pvptiers.com/api/profile/", uuid, extra);
+            }
 
-            profilePvPTiers.setOnUpdate(this::updateAppendingText);
+            if (profileVNList != null)
+                profileVNList.setOnUpdate(this::updateAppendingText);
+            if (profilePvPTiers != null)
+                profilePvPTiers.setOnUpdate(this::updateAppendingText);
         });
     }
 
@@ -325,10 +333,12 @@ public class PlayerProfile {
         toAppendRight = Text.empty();
         toAppendLeft = Text.empty();
 
+        SuperProfile activeProfile = profileVNList != null ? profileVNList : profilePvPTiers;
+
         if (positionPvPTiers == DisplayStatus.RIGHT)
-            toAppendRight = updateProfileNameRight(profilePvPTiers, activePvPTiersMode);
+            toAppendRight = updateProfileNameRight(activeProfile, activePvPTiersMode);
         else if (positionPvPTiers == DisplayStatus.LEFT)
-            toAppendLeft = updateProfileNameLeft(profilePvPTiers, activePvPTiersMode);
+            toAppendLeft = updateProfileNameLeft(activeProfile, activePvPTiersMode);
 
         cachesDirty = true;
     }
@@ -350,9 +360,44 @@ public class PlayerProfile {
             return original;
 
         return fullName = Text.empty()
+                .append(Text.literal("\u200C"))
                 .append(toAppendLeft.copy())
                 .append(original.copy())
-                .append(toAppendRight.copy());
+                .append(toAppendRight.copy())
+                .append(Text.literal("\u200C"));
+    }
+
+    public static Text stripTierTags(Text original) {
+        if (original == null)
+            return null;
+        String full = original.getString();
+        if (!full.contains("\u200C"))
+            return original;
+
+        MutableText result = Text.empty();
+        original.visit((style, string) -> {
+            String clean = string.replace("\u200C", "");
+
+            for (PlayerProfile profile : TiersClient.readyPlayerProfiles.values()) {
+                if (profile.toAppendLeft != null && !profile.toAppendLeft.getString().isEmpty()) {
+                    String leftStr = profile.toAppendLeft.getString().replace("\u200C", "");
+                    if (!leftStr.isEmpty() && clean.contains(leftStr))
+                        clean = clean.replace(leftStr, "");
+                }
+                if (profile.toAppendRight != null && !profile.toAppendRight.getString().isEmpty()) {
+                    String rightStr = profile.toAppendRight.getString().replace("\u200C", "");
+                    if (!rightStr.isEmpty() && clean.contains(rightStr))
+                        clean = clean.replace(rightStr, "");
+                }
+            }
+
+            if (!clean.isEmpty())
+                result.append(Text.literal(clean).setStyle(style));
+
+            return Optional.empty();
+        }, Style.EMPTY);
+
+        return result;
     }
 
     private Text updateProfileNameRight(SuperProfile superProfile, Mode activeMode) {
@@ -410,11 +455,16 @@ public class PlayerProfile {
     }
 
     public void resetDrawnStatus() {
-        if (profilePvPTiers == null)
-            return;
-        profilePvPTiers.apiErrorShown = false;
-        profilePvPTiers.drawn = false;
-        profilePvPTiers.gameModes.forEach(gameMode -> gameMode.drawn = false);
+        if (profileVNList != null) {
+            profileVNList.apiErrorShown = false;
+            profileVNList.drawn = false;
+            profileVNList.gameModes.forEach(gameMode -> gameMode.drawn = false);
+        }
+        if (profilePvPTiers != null) {
+            profilePvPTiers.apiErrorShown = false;
+            profilePvPTiers.drawn = false;
+            profilePvPTiers.gameModes.forEach(gameMode -> gameMode.drawn = false);
+        }
     }
 
     public boolean isPlayerValid() {
@@ -494,9 +544,7 @@ public class PlayerProfile {
                 MutableText namePart = Text.empty();
                 appendChunkedText(characters, i, end, namePart);
 
-                result.append(Text.literal("\u200C"));
                 result.append(getFullName(namePart));
-                result.append(Text.literal("\u200C"));
 
                 i = end;
                 matchIndex++;

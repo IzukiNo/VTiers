@@ -4,8 +4,8 @@ import com.tiers.TiersClient;
 import com.tiers.profile.GameMode;
 import com.tiers.profile.PlayerProfile;
 import com.tiers.profile.Status;
-import com.tiers.profile.types.PvPTiersProfile;
 import com.tiers.profile.types.SuperProfile;
+import com.tiers.profile.types.VNListProfile;
 import com.tiers.textures.ColorControl;
 import com.tiers.textures.Icons;
 import net.fabricmc.loader.api.FabricLoader;
@@ -90,7 +90,7 @@ public class PlayerSearchResultScreen extends Screen {
 
         context.drawCenteredTextWithShadow(textRenderer, playerProfile.getFullName(), centerX, height / 55, Colors.WHITE);
 
-        drawCategoryList(context, PvPTiersProfile.PVPTIERS_IMAGE, playerProfile.profilePvPTiers, centerX, listY);
+        drawCategoryList(context, VNListProfile.VNLIST_IMAGE, playerProfile.profileVNList != null ? playerProfile.profileVNList : playerProfile.profilePvPTiers, centerX, listY);
     }
 
     private void drawCategoryList(DrawContext context, Identifier image, SuperProfile superProfile, int x, int y) {
@@ -280,6 +280,6 @@ public class PlayerSearchResultScreen extends Screen {
         }).dimensions(width - 20 - 5, height - 20 - 5, 20, 20).tooltip(Tooltip.of(Text.literal("Open " + playerProfile.targetName + "'s NameMC page"))).build());
 
         addDrawableChild(ButtonWidget.builder(Text.of("Update"), (buttonWidget) -> TiersClient.showUpdatedPlayerProfile(playerProfile, true)).dimensions(5, height - 20 - 5, 68, 20).tooltip(Tooltip.of(Text.of("Reload the player profile"))).build());
-        addDrawableChild(ButtonWidget.builder(Icons.CYCLE, (buttonWidget) -> playerProfile.updateTierlistProfiles(2)).dimensions(5, height - 20 - 5 - 22, 20, 20).tooltip(Tooltip.of(Text.literal(("Update PvPTiers results")))).build());
+        addDrawableChild(ButtonWidget.builder(Icons.CYCLE, (buttonWidget) -> playerProfile.updateTierlistProfiles(2)).dimensions(5, height - 20 - 5 - 22, 20, 20).tooltip(Tooltip.of(Text.literal(("Update VNList results")))).build());
     }
 }

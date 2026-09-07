@@ -40,22 +40,25 @@ public class GameMode {
         String peakPos;
         String retired;
 
-        if (jsonObject.has("tier") && jsonObject.has("pos") &&
-                jsonObject.has("attained") && jsonObject.has("retired")) {
+        if (jsonObject.has("tier") && jsonObject.has("pos") && jsonObject.has("retired")) {
             tier = jsonObject.get("tier").getAsString();
             pos = jsonObject.get("pos").getAsString();
 
-            if (jsonObject.get("peak_tier").isJsonNull())
+            if (!jsonObject.has("peak_tier") || jsonObject.get("peak_tier").isJsonNull())
                 peakTier = tier;
             else
                 peakTier = jsonObject.get("peak_tier").getAsString();
 
-            if (jsonObject.get("peak_pos").isJsonNull())
+            if (!jsonObject.has("peak_pos") || jsonObject.get("peak_pos").isJsonNull())
                 peakPos = pos;
             else
                 peakPos = jsonObject.get("peak_pos").getAsString();
 
-            attained = jsonObject.get("attained").getAsString();
+            if (jsonObject.has("attained") && !jsonObject.get("attained").isJsonNull())
+                attained = jsonObject.get("attained").getAsString();
+            else
+                attained = null;
+
             retired = jsonObject.get("retired").getAsString();
         } else {
             status = Status.NOT_EXISTING;
@@ -93,7 +96,13 @@ public class GameMode {
             tierTooltipString += "High ";
         else tierTooltipString += "Low ";
 
-        tierTooltipString += "Tier " + tier + "\n\nPoints: " + getTierPoints(false) + "\nAttained: " + LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(attained)), ZoneId.systemDefault()).toString().replace("T", " ");
+        tierTooltipString += "Tier " + tier + "\n\nPoints: " + getTierPoints(false);
+        if (attained != null) {
+            try {
+                tierTooltipString += "\nAttained: " + LocalDateTime.ofInstant(Instant.ofEpochSecond(Long.parseLong(attained)), ZoneId.systemDefault()).toString().replace("T", " ");
+            } catch (Exception ignored) {
+            }
+        }
 
         return Text.literal(tierTooltipString).setStyle(Style.EMPTY.withColor(getTierColor(displayedTierUnformatted)));
     }
@@ -121,17 +130,17 @@ public class GameMode {
 
         if (tier.equalsIgnoreCase("HT1")) return 60;
         else if (tier.equalsIgnoreCase("LT1")) {
-            if (gamemode.toString().contains("PVPTIERS"))
+            if (gamemode.toString().contains("PVPTIERS") || gamemode.toString().contains("VNLIST"))
                 return 44;
             else
                 return 45;
         } else if (tier.equalsIgnoreCase("HT2")) {
-            if (gamemode.toString().contains("PVPTIERS"))
+            if (gamemode.toString().contains("PVPTIERS") || gamemode.toString().contains("VNLIST"))
                 return 28;
             else
                 return 30;
         } else if (tier.equalsIgnoreCase("LT2")) {
-            if (gamemode.toString().contains("PVPTIERS"))
+            if (gamemode.toString().contains("PVPTIERS") || gamemode.toString().contains("VNLIST"))
                 return 16;
             else
                 return 20;

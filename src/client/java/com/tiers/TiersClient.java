@@ -70,7 +70,7 @@ public class TiersClient implements ClientModInitializer {
     public static Icons.Type activeIcons = Icons.Type.PVPTIERS;
 
     public static DisplayStatus positionPvPTiers = DisplayStatus.LEFT;
-    public static Mode activePvPTiersMode = Mode.PVPTIERS_CRYSTAL;
+    public static Mode activePvPTiersMode = Mode.VNLIST_VANILLA;
 
     public static KeyBinding autoDetectKey;
     public static KeyBinding openClosestPlayerProfile;
@@ -150,7 +150,9 @@ public class TiersClient implements ClientModInitializer {
         MinecraftClient.getInstance().execute(() -> {
             playerProfiles.forEach(playerProfile -> {
                 if (playerProfile.status == Status.READY) {
-                    if (playerProfile.profilePvPTiers.status == Status.READY)
+                    if (playerProfile.profileVNList != null && playerProfile.profileVNList.status == Status.READY)
+                        playerProfile.profileVNList.parseJson(playerProfile.profileVNList.originalJson);
+                    if (playerProfile.profilePvPTiers != null && playerProfile.profilePvPTiers.status == Status.READY)
                         playerProfile.profilePvPTiers.parseJson(playerProfile.profilePvPTiers.originalJson);
                 }
                 playerProfile.updateAppendingText();
@@ -248,7 +250,7 @@ public class TiersClient implements ClientModInitializer {
     public static void toggleMod(CommandContext<FabricClientCommandSource> ignoredFabricClientCommandSourceCommandContext) {
         toggleMod = !toggleMod;
         ConfigManager.saveConfig();
-        sendMessageToPlayer(Icons.colorText("Tiers is now " + (toggleMod ? "enabled" : "disabled"), toggleMod ? "green" : "red"), true);
+        sendMessageToPlayer(Icons.colorText("VTiers đang " + (toggleMod ? "bật" : "tắt"), toggleMod ? "green" : "red"), true);
     }
 
     public static void toggleMod() {
@@ -288,11 +290,11 @@ public class TiersClient implements ClientModInitializer {
             setScreen(ConfigScreen.getConfigScreen(null));
         else if (playerName.equalsIgnoreCase("-help") || playerName.equalsIgnoreCase("-debug")) {
             sendMessageToPlayer(Icons.colorText("", Colors.WHITE), false);
-            sendMessageToPlayer(Icons.colorText("--- Tiers help ---", Colors.YELLOW), false);
-            sendMessageToPlayer(Text.literal("- General contact: ").append(Text.literal("flavio6561 on Discord").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://discordapp.com/users/715189608085716992"))))), false);
-            sendMessageToPlayer(Text.literal("- Report a bug: ").append(Text.literal("Tiers GitHub issues").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/PvPTiers/Tiers/issues"))))), false);
-            sendMessageToPlayer(Text.literal("- It's not advisable to create tickets in PvPTiers support"), false);
-            sendMessageToPlayer(Text.literal("- ").append(Text.literal("Changelogs").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/PvPTiers/Tiers/wiki/Version-changelogs"))))), false);
+            sendMessageToPlayer(Icons.colorText("--- VTiers help ---", Colors.YELLOW), false);
+            sendMessageToPlayer(Text.literal("- General contact: ").append(Text.literal("izukinoo on Discord").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://discordapp.com/users/854356889320423424"))))), false);
+            sendMessageToPlayer(Text.literal("- Report a bug: ").append(Text.literal("VTiers GitHub issues").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/IzukiNo/VTiers/issues"))))), false);
+            sendMessageToPlayer(Text.literal("- It's not advisable to create tickets in VNList support"), false);
+            sendMessageToPlayer(Text.literal("- ").append(Text.literal("Changelogs").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/IzukiNo/VTiers/wiki/Version-changelogs"))))), false);
             sendMessageToPlayer(Text.literal("- ").append(Text.literal("Modrinth page").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://modrinth.com/mod/tiers"))))), false);
 
             String[] debugInfo = getDebugInfo();
@@ -326,19 +328,19 @@ public class TiersClient implements ClientModInitializer {
             sendMessageToPlayer(Icons.colorText("", Colors.WHITE), false);
             sendMessageToPlayer(Icons.colorText("Player profiles status:", "green"), false);
             sendMessageToPlayer(Icons.colorText("Cached players: " + PlayerProfile.playerProfilesRequests.get() + " (" + PlayerProfile.failedPlayerProfilesRequests.get() + " failed)", Colors.WHITE), false);
-            sendMessageToPlayer(Icons.colorText("PvPTiers requests failed: " + SuperProfile.failedPvPTiersRequests + "/" + SuperProfile.PvPTiersRequests + " (failed / requested)", Colors.YELLOW), false);
+            sendMessageToPlayer(Icons.colorText("VNList requests failed: " + SuperProfile.failedVNListRequests + "/" + SuperProfile.VNListRequests + " (failed / requested)", Colors.YELLOW), false);
             sendMessageToPlayer(Icons.colorText("", Colors.WHITE), false);
-            sendMessageToPlayer(Icons.colorText("PvPTiers status | is down? " + SuperProfile.isPvPTiersDown + " | Failed request in last minute: " + SuperProfile.failedPvPTiersRequestsLastMinute, Colors.YELLOW), false);
+            sendMessageToPlayer(Icons.colorText("VNList status | is down? " + SuperProfile.isVNListDown + " | Failed request in last minute: " + SuperProfile.failedVNListRequestsLastMinute, Colors.YELLOW), false);
             sendMessageToPlayer(Icons.colorText("Tiers will try to recover all failed requests once the services come back up", Colors.WHITE), false);
             sendMessageToPlayer(Icons.colorText("", Colors.WHITE), false);
         } else if (playerName.startsWith("-")) {
             sendMessageToPlayer(Icons.colorText("", Colors.WHITE), false);
             sendMessageToPlayer(Icons.colorText("Not a valid command. Here's a list of valid commands:", "red"), false);
-            sendMessageToPlayer(Icons.colorText("/tiers -toggle", Colors.YELLOW), false);
-            sendMessageToPlayer(Icons.colorText("/tiers -config", Colors.YELLOW), false);
-            sendMessageToPlayer(Icons.colorText("/tiers -help | /tiers -debug", Colors.YELLOW), false);
-            sendMessageToPlayer(Icons.colorText("/tiers -clear", Colors.YELLOW), false);
-            sendMessageToPlayer(Icons.colorText("/tiers -status", Colors.YELLOW), false);
+            sendMessageToPlayer(Icons.colorText("/vtiers -toggle", Colors.YELLOW), false);
+            sendMessageToPlayer(Icons.colorText("/vtiers -config", Colors.YELLOW), false);
+            sendMessageToPlayer(Icons.colorText("/vtiers -help | /vtiers -debug", Colors.YELLOW), false);
+            sendMessageToPlayer(Icons.colorText("/vtiers -clear", Colors.YELLOW), false);
+            sendMessageToPlayer(Icons.colorText("/vtiers -status", Colors.YELLOW), false);
             sendMessageToPlayer(Icons.colorText("", Colors.WHITE), false);
         } else {
             PlayerProfile playerProfile = addGetPlayer(playerName, true);
@@ -387,8 +389,10 @@ public class TiersClient implements ClientModInitializer {
     public static void changeIcons(Icons.Type iconType, boolean reload) {
         Icons.identifierMCTiers = Identifier.of("minecraft", "gamemodes/" + iconType.name().toLowerCase(Locale.ROOT));
         Icons.identifierPvPTiers = Identifier.of("minecraft", "gamemodes/" + iconType.name().toLowerCase(Locale.ROOT));
+        Icons.identifierVNList = Identifier.of("minecraft", "gamemodes/" + iconType.name().toLowerCase(Locale.ROOT));
         Icons.identifierMCTiersTags = Identifier.of("minecraft", "gamemodes/" + iconType.name().toLowerCase(Locale.ROOT) + "-tags");
         Icons.identifierPvPTiersTags = Identifier.of("minecraft", "gamemodes/" + iconType.name().toLowerCase(Locale.ROOT) + "-tags");
+        Icons.identifierVNListTags = Identifier.of("minecraft", "gamemodes/" + iconType.name().toLowerCase(Locale.ROOT) + "-tags");
         ColorLoader.identifier = Identifier.of("minecraft", "colors/" + iconType.name().toLowerCase(Locale.ROOT) + ".json");
 
         if (reload)
@@ -444,7 +448,7 @@ public class TiersClient implements ClientModInitializer {
     }
 
     public static Text cyclePvPTiersMode() {
-        activePvPTiersMode = cycleEnum(activePvPTiersMode, Mode.getPvPTiersValues());
+        activePvPTiersMode = cycleEnum(activePvPTiersMode, Mode.getVNListValues());
         ConfigManager.saveConfig();
         return activePvPTiersMode.getTextLabel();
     }

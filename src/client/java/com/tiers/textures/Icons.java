@@ -8,10 +8,12 @@ import net.minecraft.util.Identifier;
 public class Icons {
     public static Identifier identifierMCTiers = Identifier.of("minecraft", "gamemodes/pvptiers");
     public static Identifier identifierPvPTiers = Identifier.of("minecraft", "gamemodes/pvptiers");
+    public static Identifier identifierVNList = Identifier.of("minecraft", "gamemodes/pvptiers");
     public static final Identifier identifierSubtiers = Identifier.of("minecraft", "gamemodes/subtiers");
 
     public static Identifier identifierMCTiersTags = Identifier.of("minecraft", "gamemodes/pvptiers-tags");
     public static Identifier identifierPvPTiersTags = Identifier.of("minecraft", "gamemodes/pvptiers-tags");
+    public static Identifier identifierVNListTags = Identifier.of("minecraft", "gamemodes/pvptiers-tags");
     public static final Identifier identifierSubtiersTags = Identifier.of("minecraft", "gamemodes/subtiers-tags");
 
     public static Text GLOBE = Text.literal("\uF000").setStyle(Style.EMPTY.withColor(ColorControl.getColorMinecraftStandard("region")).withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));

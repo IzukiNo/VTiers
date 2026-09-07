@@ -57,11 +57,11 @@ java {
 
 modrinth {
     token = System.getenv("MODRINTH_TOKEN")
-    projectId = "bubOj4AD"
+    projectId = "5yiW0ckc"
     versionNumber = "${project.version}"
-    versionName = "Tiers ${project.version}"
+    versionName = "VTiers ${project.version}"
     def changelogVersion = project.simple_version.replace('.', '')
-    changelog = "[Version ${project.simple_version}](https://github.com/PvPTiers/Tiers/wiki/Version-changelogs#version-${changelogVersion})"
+    changelog = "[Version ${project.simple_version}](https://github.com/IzukiNo/VTiers/wiki/Version-changelogs#version-${changelogVersion})"
     uploadFile = remapJar
     versionType = "beta"
     gameVersions = [project.minecraft_version]

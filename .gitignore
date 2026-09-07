@@ -43,3 +43,8 @@ replay_*.log
 
 .github
 gradle
+
+# VTiers
+
+.claude/
+docs/

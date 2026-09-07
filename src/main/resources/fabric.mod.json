@@ -1,35 +1,29 @@
 {
   "schemaVersion": 1,
-  "id": "tiers",
+  "id": "vtiers",
   "version": "${version}",
-  "name": "Tiers",
-  "description": "Official PvPTiers tiers display mod",
-  "authors": [
-    "Flavio6561"
-  ],
+  "name": "VTiers",
+  "description": "",
+  "authors": ["IzukiNo"],
   "license": "GPL-3.0",
   "contact": {
-    "issues": "https://github.com/PvPTiers/Tiers/issues",
-    "homepage": "https://github.com/PvPTiers/Tiers"
+    "issues": "https://github.com/IzukiNo/VTiers/issues",
+    "homepage": "https://github.com/IzukiNo/VTiers"
   },
   "custom": {
     "modmenu": {
       "links": {
-        "GitHub": "https://github.com/PvPTiers/Tiers",
-        "Modrinth page": "https://modrinth.com/mod/tiers",
-        "Changelogs": "https://github.com/PvPTiers/Tiers/wiki/Version-changelogs",
-        "GitHub Issues": "https://github.com/PvPTiers/Tiers/issues"
+        "GitHub": "https://github.com/IzukiNo/VTiers",
+        "Modrinth page": "https://modrinth.com/mod/vtiers",
+        "Changelogs": "https://github.com/IzukiNo/VTiers/wiki/Version-changelogs",
+        "GitHub Issues": "https://github.com/IzukiNo/VTiers/issues"
       }
     }
   },
   "icon": "assets/tiers/icon.png",
   "entrypoints": {
-    "client": [
-      "com.tiers.TiersClient"
-    ],
-    "modmenu": [
-      "com.tiers.misc.ModMenuIntegration"
-    ]
+    "client": ["com.tiers.TiersClient"],
+    "modmenu": ["com.tiers.misc.ModMenuIntegration"]
   },
   "mixins": [
     {

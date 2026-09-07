@@ -27,34 +27,37 @@ public class ColorLoader implements ResourceReloader {
 
     @Override
     public CompletableFuture<Void> reload(Store store, Executor prepareExecutor, Synchronizer reloadSynchronizer, Executor applyExecutor) {
-        if (store.getResourceManager().getResource(identifier).isPresent()) {
-            try {
-                ColorControl.updateColors(JsonHelper.deserialize(new Gson(), new InputStreamReader(store.getResourceManager().getResource(identifier).get().getInputStream(), StandardCharsets.UTF_8), JsonObject.class));
+        return CompletableFuture.supplyAsync(() -> {
+            if (store.getResourceManager().getResource(identifier).isPresent()) {
+                try {
+                    return JsonHelper.deserialize(new Gson(), new InputStreamReader(store.getResourceManager().getResource(identifier).get().getInputStream(), StandardCharsets.UTF_8), JsonObject.class);
+                } catch (IOException ignored) {
+                    LOGGER.warn("Error loading colors info");
+                }
+            }
+            return null;
+        }, prepareExecutor).thenCompose(reloadSynchronizer::whenPrepared).thenAcceptAsync(jsonObject -> {
+            if (jsonObject != null) {
+                ColorControl.updateColors(jsonObject);
                 TiersClient.restyleAllTexts(TiersClient.playerProfiles);
                 TiersClient.updateAllTags();
-            } catch (IOException ignored) {
-                LOGGER.warn("Error loading colors info");
             }
-        }
 
-        if (ConfigScreen.ownProfile == null) {
-            ConfigScreen.ownProfile = new PlayerProfile(MinecraftClient.getInstance().getGameProfile().name(), false);
-            PlayerProfileQueue.putFirstInQueue(ConfigScreen.ownProfile);
+            if (ConfigScreen.ownProfile == null) {
+                ConfigScreen.ownProfile = new PlayerProfile(MinecraftClient.getInstance().getGameProfile().name(), false);
+                PlayerProfileQueue.putFirstInQueue(ConfigScreen.ownProfile);
 
-            String defaultProfileMojang = loadStringFromResources("json/defaultProfileMojang.json");
-            String defaultProfilePvPTiers = loadStringFromResources("json/defaultProfilePvPTiers.json");
+                String defaultProfileMojang = loadStringFromResources("json/defaultProfileMojang.json");
+                String defaultProfileVNList = loadStringFromResources("json/defaultProfileVNList.json");
 
-            ConfigScreen.defaultProfile = new PlayerProfile(defaultProfileMojang, defaultProfilePvPTiers);
+                ConfigScreen.defaultProfile = new PlayerProfile(defaultProfileMojang, defaultProfileVNList);
 
-        } else {
-            ArrayList<PlayerProfile> configProfiles = new ArrayList<>();
-            configProfiles.add(ConfigScreen.defaultProfile);
-            configProfiles.add(ConfigScreen.ownProfile);
-            TiersClient.restyleAllTexts(configProfiles);
-        }
-
-        return CompletableFuture.runAsync(() -> {
-        }, prepareExecutor).thenCompose(reloadSynchronizer::whenPrepared).thenRunAsync(() -> {
+            } else {
+                ArrayList<PlayerProfile> configProfiles = new ArrayList<>();
+                configProfiles.add(ConfigScreen.defaultProfile);
+                configProfiles.add(ConfigScreen.ownProfile);
+                TiersClient.restyleAllTexts(configProfiles);
+            }
         }, applyExecutor);
     }
 

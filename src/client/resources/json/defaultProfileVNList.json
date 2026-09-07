@@ -1,0 +1,69 @@
+{
+  "success": true,
+  "data": {
+    "minecraftUUID": "06ec3577329945fabbdf613b1f86c8ab",
+    "ranks": {
+      "vanilla": {
+        "tier": 1,
+        "pos": 1,
+        "peak_tier": 1,
+        "peak_pos": 1,
+        "retired": false
+      },
+      "sword": {
+        "tier": 2,
+        "pos": 0,
+        "peak_tier": 2,
+        "peak_pos": 0,
+        "retired": true
+      },
+      "uhc": {
+        "tier": 2,
+        "pos": 1,
+        "peak_tier": 2,
+        "peak_pos": 1,
+        "retired": false
+      },
+      "pot": {
+        "tier": 3,
+        "pos": 1,
+        "peak_tier": 3,
+        "peak_pos": 1,
+        "retired": false
+      },
+      "nethop": {
+        "tier": 1,
+        "pos": 1,
+        "peak_tier": 1,
+        "peak_pos": 1,
+        "retired": true
+      },
+      "smp": {
+        "tier": 1,
+        "pos": 0,
+        "peak_tier": 1,
+        "peak_pos": 0,
+        "retired": true
+      },
+      "axe": {
+        "tier": 3,
+        "pos": 0,
+        "peak_tier": 3,
+        "peak_pos": 0,
+        "retired": false
+      },
+      "mace": {
+        "tier": 2,
+        "pos": 1,
+        "peak_tier": 2,
+        "peak_pos": 1,
+        "retired": true
+      }
+    },
+    "point": 300,
+    "overall": 1,
+    "updatedAt": "2026-08-09T15:06:38.368Z",
+    "username": "ItzRealMe",
+    "isBlacklisted": false
+  }
+}

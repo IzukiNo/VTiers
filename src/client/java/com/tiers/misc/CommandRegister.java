@@ -18,24 +18,24 @@ import java.util.concurrent.CompletableFuture;
 public class CommandRegister {
     private static final SuggestionProvider<FabricClientCommandSource> PLAYERS = (commandContext, suggestionsBuilder) -> suggestPlayers(suggestionsBuilder);
 
-    private static CompletableFuture<Suggestions> suggestPlayers(SuggestionsBuilder suggestionsBuilder) {
-        MinecraftClient minecraftClient = MinecraftClient.getInstance();
-        if (minecraftClient.world == null || minecraftClient.getNetworkHandler() == null)
-            return suggestionsBuilder.buildFuture();
-
-        for (PlayerListEntry playerListEntry : minecraftClient.getNetworkHandler().getPlayerList())
-            if (CommandSource.shouldSuggest(suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT), playerListEntry.getProfile().name().toLowerCase(Locale.ROOT)) && playerListEntry.getProfile().name().length() > 2)
-                suggestionsBuilder.suggest(playerListEntry.getProfile().name(), () -> "Search tiers for " + playerListEntry.getProfile().name());
-
-        if (CommandSource.shouldSuggest(suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT), "-config"))
-            suggestionsBuilder.suggest("-config", () -> "Open Tiers config screen");
-
+private static CompletableFuture<Suggestions> suggestPlayers(SuggestionsBuilder suggestionsBuilder) {
+    MinecraftClient minecraftClient = MinecraftClient.getInstance();
+    if (minecraftClient.world == null || minecraftClient.getNetworkHandler() == null)
         return suggestionsBuilder.buildFuture();
-    }
+
+    if (CommandSource.shouldSuggest(suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT), "-config"))
+        suggestionsBuilder.suggest("-config", () -> "Open Tiers config screen");
+
+    for (PlayerListEntry playerListEntry : minecraftClient.getNetworkHandler().getPlayerList())
+        if (CommandSource.shouldSuggest(suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT), playerListEntry.getProfile().name().toLowerCase(Locale.ROOT)) && playerListEntry.getProfile().name().length() > 2)
+            suggestionsBuilder.suggest(playerListEntry.getProfile().name(), () -> "Search tiers for " + playerListEntry.getProfile().name());
+
+    return suggestionsBuilder.buildFuture();
+}
 
     public static void registerCommands() {
         ClientCommandRegistrationCallback.EVENT.register((commandDispatcher, commandRegistryAccess) -> commandDispatcher.register(
-                ClientCommandManager.literal("tiers").executes(ignored -> {
+                ClientCommandManager.literal("vtiers").executes(ignored -> {
                             TiersClient.toggleMod(null);
                             return 1;
                         })

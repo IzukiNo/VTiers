@@ -5,7 +5,7 @@ import com.tiers.TiersClient;
 import com.tiers.misc.ConfigManager;
 import com.tiers.profile.PlayerProfile;
 import com.tiers.profile.Status;
-import com.tiers.profile.types.PvPTiersProfile;
+import com.tiers.profile.types.VNListProfile;
 import com.tiers.textures.ColorControl;
 import com.tiers.textures.Icons;
 import net.fabricmc.loader.api.FabricLoader;
@@ -94,7 +94,7 @@ public class ConfigScreen extends Screen {
 
         context.drawCenteredTextWithShadow(textRenderer, useOwnProfile ? ownProfile.getFullName() : defaultProfile.getFullName(), centerX, height - (int) (height / 4.166) - height / 54 - 12, Colors.WHITE);
 
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, PvPTiersProfile.PVPTIERS_IMAGE, centerX - 12, distance + 110 + 4, 0, 0, 24, 24, 24, 24);
+        context.drawTexture(RenderPipelines.GUI_TEXTURED, VNListProfile.VNLIST_IMAGE, centerX - 12, distance + 110 + 4, 0, 0, 24, 24, 24, 24);
 
         context.drawTextWithShadow(textRenderer, TiersClient.getRightIcon(), centerX + 90 + 32, distance + 75 + 9, Colors.WHITE);
         context.drawTextWithShadow(textRenderer, TiersClient.getLeftIcon(), centerX - 90 - 32 - 12, distance + 75 + 9, Colors.WHITE);

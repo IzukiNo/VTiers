@@ -28,43 +28,43 @@ public class InventoryChecker {
         PlayerInventory playerInventory = minecraftClient.player.getInventory();
 
         if (checkVanilla(playerInventory)) {
-            TiersClient.activePvPTiersMode = Mode.PVPTIERS_CRYSTAL;
-            detected = Mode.MCTIERS_VANILLA;
+            TiersClient.activePvPTiersMode = Mode.VNLIST_VANILLA;
+            detected = Mode.VNLIST_VANILLA;
         }
 
         if (checkSword(playerInventory)) {
-            TiersClient.activePvPTiersMode = Mode.PVPTIERS_SWORD;
-            detected = Mode.MCTIERS_SWORD;
+            TiersClient.activePvPTiersMode = Mode.VNLIST_SWORD;
+            detected = Mode.VNLIST_SWORD;
         }
 
         if (checkUhc(playerInventory)) {
-            TiersClient.activePvPTiersMode = Mode.PVPTIERS_UHC;
-            detected = Mode.MCTIERS_UHC;
+            TiersClient.activePvPTiersMode = Mode.VNLIST_UHC;
+            detected = Mode.VNLIST_UHC;
         }
 
         if (checkPot(playerInventory)) {
-            TiersClient.activePvPTiersMode = Mode.PVPTIERS_POT;
-            detected = Mode.MCTIERS_POT;
+            TiersClient.activePvPTiersMode = Mode.VNLIST_POT;
+            detected = Mode.VNLIST_POT;
         }
 
         if (checkNethPot(playerInventory)) {
-            TiersClient.activePvPTiersMode = Mode.PVPTIERS_NETH_POT;
-            detected = Mode.MCTIERS_NETH_OP;
+            TiersClient.activePvPTiersMode = Mode.VNLIST_NETHOP;
+            detected = Mode.VNLIST_NETHOP;
         }
 
         if (checkSmp(playerInventory)) {
-            TiersClient.activePvPTiersMode = Mode.PVPTIERS_SMP;
-            detected = Mode.MCTIERS_SMP;
+            TiersClient.activePvPTiersMode = Mode.VNLIST_SMP;
+            detected = Mode.VNLIST_SMP;
         }
 
         if (checkAxe(playerInventory)) {
-            TiersClient.activePvPTiersMode = Mode.PVPTIERS_AXE;
-            detected = Mode.MCTIERS_AXE;
+            TiersClient.activePvPTiersMode = Mode.VNLIST_AXE;
+            detected = Mode.VNLIST_AXE;
         }
 
         if (checkMace(playerInventory)) {
-            TiersClient.activePvPTiersMode = Mode.PVPTIERS_MACE;
-            detected = Mode.MCTIERS_MACE;
+            TiersClient.activePvPTiersMode = Mode.VNLIST_MACE;
+            detected = Mode.VNLIST_MACE;
         }
 
         if (oldActivePvPTiersMode != TiersClient.activePvPTiersMode && detected != null) {

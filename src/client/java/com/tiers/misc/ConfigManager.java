@@ -74,7 +74,7 @@ public class ConfigManager {
 
         if (Arrays.stream(TiersClient.DisplayStatus.values()).toList().contains(config.positionPvPTiers))
             TiersClient.positionPvPTiers = config.positionPvPTiers;
-        if (Arrays.stream(Mode.values()).toList().contains(config.activePvPTiersMode) && config.activePvPTiersMode.toString().contains("PVPTIERS"))
+        if (Arrays.stream(Mode.values()).toList().contains(config.activePvPTiersMode) && (config.activePvPTiersMode.toString().contains("PVPTIERS") || config.activePvPTiersMode.toString().contains("VNLIST")))
             TiersClient.activePvPTiersMode = config.activePvPTiersMode;
 
         if (config.version == null) {
