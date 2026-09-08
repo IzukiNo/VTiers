@@ -20,13 +20,13 @@ import java.util.concurrent.CompletableFuture;
 
 public class ConfigManager {
     private static Config config;
-    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("Tiers.json");
+    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve("VTiers.json");
     private static String version;
     private static boolean upgradeAdjustmentDone;
     private static int launchTickCounter;
 
     static {
-        FabricLoader.getInstance().getModContainer("vtiers").or(() -> FabricLoader.getInstance().getModContainer("tiers")).ifPresent(tiers -> version = tiers.getMetadata().getVersion().getFriendlyString());
+        FabricLoader.getInstance().getModContainer("vtiers").ifPresent(tiers -> version = tiers.getMetadata().getVersion().getFriendlyString());
     }
 
     private static class Config {
@@ -86,7 +86,7 @@ public class ConfigManager {
                     launchTickCounter++;
 
                     if (launchTickCounter >= 20) {
-                        minecraftClient.getToastManager().add(SystemToast.create(minecraftClient, SystemToast.Type.NARRATOR_TOGGLE, Text.of("Thanks for updating Tiers"), Text.of("Some settings may have changed")));
+                        minecraftClient.getToastManager().add(SystemToast.create(minecraftClient, SystemToast.Type.NARRATOR_TOGGLE, Text.of("Thanks for updating VTiers"), Text.of("Some settings may have changed")));
                         TiersClient.toggleMod = true;
                         TiersClient.toggleIcons = true;
                         TiersClient.toggleTab = true;
@@ -108,7 +108,7 @@ public class ConfigManager {
         config = new Config();
         updateConfig(config);
 
-        TiersClient.LOGGER.info("Broken config file: Tiers has restored values from the client memory");
+        TiersClient.LOGGER.info("Broken config file: VTiers has restored values from the client memory");
 
         saveConfig();
     }
