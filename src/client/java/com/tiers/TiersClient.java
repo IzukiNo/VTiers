@@ -84,20 +84,20 @@ public class TiersClient implements ClientModInitializer {
         clearCache(true);
         CommandRegister.registerCommands();
 
-        Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer("vtiers").or(() -> FabricLoader.getInstance().getModContainer("tiers"));
+        Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer("vtiers");
 
         modContainer.ifPresent(tiers -> {
-            ResourceLoader.registerBuiltinPack(Identifier.of("resourcepacks", "tiers-resources"), tiers, Text.of("Resources for Tiers"), PackActivationType.ALWAYS_ENABLED);
+            ResourceLoader.registerBuiltinPack(Identifier.of("vtiers", "tiers-resources"), tiers, Text.of("Resources for VTiers"), PackActivationType.ALWAYS_ENABLED);
             userAgent += " v" + tiers.getMetadata().getVersion().getFriendlyString();
         });
 
-        KeyBinding.Category category = KeyBinding.Category.create(Identifier.of("tiers"));
+        KeyBinding.Category category = KeyBinding.Category.create(Identifier.of("vtiers"));
         autoDetectKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("Auto Detect Kit", GLFW.GLFW_KEY_Y, category));
         openClosestPlayerProfile = KeyBindingHelper.registerKeyBinding(new KeyBinding("Open Closest Player Profile", GLFW.GLFW_KEY_H, category));
         cycleRightKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("Cycle Right Gamemodes", GLFW.GLFW_KEY_I, category));
         cycleLeftKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("Cycle Left Gamemodes", GLFW.GLFW_KEY_U, category));
 
-        ResourceLoader.get(ResourceType.CLIENT_RESOURCES).registerReloader(Identifier.of("tiers"), new ColorLoader());
+        ResourceLoader.get(ResourceType.CLIENT_RESOURCES).registerReloader(Identifier.of("vtiers", "color_loader"), new ColorLoader());
         ClientTickEvents.END_CLIENT_TICK.register(TiersClient::checkKeys);
         ClientTickEvents.END_CLIENT_TICK.register(minecraftClient -> {
             if (toggleAutoKitDetect)
@@ -301,8 +301,8 @@ public class TiersClient implements ClientModInitializer {
             sendMessageToPlayer(Icons.colorText("\n" + debugInfo[0], Colors.LIGHT_YELLOW), false);
             MinecraftClient.getInstance().keyboard.setClipboard(debugInfo[1]);
 
-            try (PrintWriter printWriter = new PrintWriter(FabricLoader.getInstance().getGameDir() + "/cache/tiers/debug.log")) {
-                printWriter.println("--- Tiers Debug log ---");
+            try (PrintWriter printWriter = new PrintWriter(FabricLoader.getInstance().getGameDir() + "/cache/vtiers/debug.log")) {
+                printWriter.println("--- VTiers Debug log ---");
                 printWriter.println("--- Section 1 ---");
                 printWriter.println(debugInfo[0]);
                 printWriter.println("--- End of section 1 ---");
@@ -364,7 +364,7 @@ public class TiersClient implements ClientModInitializer {
         debugInfo[3] = ConfigManager.getCurrentConfig();
 
         final String[] version = new String[1];
-        FabricLoader.getInstance().getModContainer("vtiers").or(() -> FabricLoader.getInstance().getModContainer("tiers")).ifPresent(tiers -> version[0] = "Tiers version: " + tiers.getMetadata().getVersion().getFriendlyString());
+        FabricLoader.getInstance().getModContainer("vtiers").ifPresent(tiers -> version[0] = "VTiers version: " + tiers.getMetadata().getVersion().getFriendlyString());
         debugInfo[0] = version[0] + "\n";
         debugInfo[1] = debugInfo[0];
         debugInfo[1] += "Launcher brand: " + MinecraftClient.getLauncherBrand() + "\n";
@@ -422,7 +422,7 @@ public class TiersClient implements ClientModInitializer {
 
         CompletableFuture.runAsync(() -> {
             try {
-                FileUtils.deleteDirectory(new File(FabricLoader.getInstance().getGameDir() + (start ? "/cache/tiers" : "/cache/tiers/players")));
+                FileUtils.deleteDirectory(new File(FabricLoader.getInstance().getGameDir() + (start ? "/cache/vtiers" : "/cache/vtiers/players")));
             } catch (IOException ignored) {
                 LOGGER.warn("Error deleting cache folder");
             }

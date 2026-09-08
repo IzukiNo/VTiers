@@ -121,10 +121,10 @@ public class PlayerSearchResultScreen extends Screen {
                     MinecraftClient client = MinecraftClient.getInstance();
                     client.setScreen(new ConfirmLinkScreen((confirmed) -> {
                         if (confirmed)
-                            Util.getOperatingSystem().open("https://github.com/PvPTiers/Tiers/issues");
+                            Util.getOperatingSystem().open("https://github.com/IzukiNo/VTiers/issues");
                         client.setScreen(this);
-                    }, "https://github.com/PvPTiers/Tiers/issues", true));
-                }).dimensions(x - 40, (int) (y + 2.8 * separator + 50 + 12), 80, 20).tooltip(Tooltip.of(Text.of("Report this issue on GitHub. Make sure to report only if the same search on either mctiers.com, pvptiers.com or subtiers.com doesn't fail"))).build());
+                    }, "https://github.com/IzukiNo/VTiers/issues", true));
+                }).dimensions(x - 40, (int) (y + 2.8 * separator + 50 + 12), 80, 20).tooltip(Tooltip.of(Text.of("Report this issue on GitHub. Make sure to report only if the same search on vnlist.asia doesn't fail"))).build());
                 superProfile.apiErrorShown = true;
             }
             return;
@@ -247,7 +247,7 @@ public class PlayerSearchResultScreen extends Screen {
         if (imageReady)
             return;
 
-        try (FileInputStream fileInputStream = new FileInputStream(FabricLoader.getInstance().getGameDir().resolve("cache/tiers/players/" + playerProfile.uuid + ".png").toFile())) {
+        try (FileInputStream fileInputStream = new FileInputStream(FabricLoader.getInstance().getGameDir().resolve("cache/vtiers/players/" + playerProfile.uuid + ".png").toFile())) {
             MinecraftClient.getInstance().getTextureManager().registerTexture(playerAvatarTexture, new NativeImageBackedTexture(null, NativeImage.read(fileInputStream)));
             imageReady = true;
         } catch (IOException ignored) {

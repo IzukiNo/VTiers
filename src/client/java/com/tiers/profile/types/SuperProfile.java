@@ -226,6 +226,10 @@ public class SuperProfile {
         for (GameMode gameMode : gameModes) {
             if (jsonObject.has(gameMode.parsingName))
                 gameMode.parseTiers(jsonObject.getAsJsonObject(gameMode.parsingName));
+            else if (gameMode.parsingName.equals("crystal") && jsonObject.has("vanilla"))
+                gameMode.parseTiers(jsonObject.getAsJsonObject("vanilla"));
+            else if (gameMode.parsingName.equals("neth_pot") && jsonObject.has("nethop"))
+                gameMode.parseTiers(jsonObject.getAsJsonObject("nethop"));
             else
                 gameMode.status = Status.NOT_EXISTING;
         }

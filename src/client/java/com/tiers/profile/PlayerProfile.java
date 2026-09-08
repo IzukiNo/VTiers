@@ -115,7 +115,7 @@ public class PlayerProfile {
             return;
         }
 
-        Path path = FabricLoader.getInstance().getGameDir().resolve("cache/tiers/06ec3577329945fabbdf613b1f86c8ab.png");
+        Path path = FabricLoader.getInstance().getGameDir().resolve("cache/vtiers/06ec3577329945fabbdf613b1f86c8ab.png");
 
         try {
             var resourceOpt = MinecraftClient.getInstance().getResourceManager().getResource(Identifier.of("minecraft", "textures/default.png"));
@@ -241,7 +241,7 @@ public class PlayerProfile {
 
         numberOfImageRequests++;
 
-        String path = FabricLoader.getInstance().getGameDir() + "/cache/tiers/" + (regular ? "players/" : "");
+        String path = FabricLoader.getInstance().getGameDir() + "/cache/vtiers/" + (regular ? "players/" : "");
         CompletableFuture.runAsync(() -> {
             try {
                 Files.createDirectories(Paths.get(path));
@@ -331,13 +331,20 @@ public class PlayerProfile {
 
             if (mode == 0 || mode == 2) {
                 profileVNList = new VNListProfile("https://api.vnlist.asia/v2/user/", uuid, extra);
-                profilePvPTiers = new PvPTiersProfile("https://pvptiers.com/api/profile/", uuid, extra);
+                profilePvPTiers = new PvPTiersProfile((String) null);
             }
 
-            if (profileVNList != null)
-                profileVNList.setOnUpdate(this::updateAppendingText);
-            if (profilePvPTiers != null)
+            if (profileVNList != null) {
+                profileVNList.setOnUpdate(() -> {
+                    if (profilePvPTiers != null && profileVNList.originalJson != null) {
+                        profilePvPTiers.parseJson(profileVNList.originalJson);
+                    }
+                    updateAppendingText();
+                });
+            }
+            if (profilePvPTiers != null) {
                 profilePvPTiers.setOnUpdate(this::updateAppendingText);
+            }
         });
     }
 
