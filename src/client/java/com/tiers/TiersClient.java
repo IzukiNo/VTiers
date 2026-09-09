@@ -53,7 +53,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class TiersClient implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(TiersClient.class);
-    public static String userAgent = "Tiers (modrinth.com/mod/tiers)";
+    public static String userAgent = "VTiers (modrinth.com/mod/vtiers)";
     public static final CopyOnWriteArrayList<PlayerProfile> playerProfiles = new CopyOnWriteArrayList<>();
     public static final HashMap<String, PlayerProfile> readyPlayerProfiles = new HashMap<>();
     public static final HttpClient httpClient = HttpClient.newHttpClient();
@@ -379,7 +379,7 @@ public class TiersClient implements ClientModInitializer {
         GpuDevice gpuDevice = RenderSystem.getDevice();
         debugInfo[1] += "GPU info:\n\t" + gpuDevice.getBackendName() + "\n\t" + gpuDevice.getImplementationInformation() + "\n\t" + gpuDevice.getRenderer() + "\n\t" + gpuDevice.getVersion() + "\n";
         debugInfo[1] += "Java version: " + System.getProperty("java.version") + "\n";
-        debugInfo[1] += "Launch args: " + Arrays.toString(FabricLoader.getInstance().getLaunchArguments(false)) + "\n";
+        debugInfo[1] += "Launch args: " + Arrays.toString(FabricLoader.getInstance().getLaunchArguments(true)) + "\n";
         debugInfo[1] += "All Fabric mods: " + FabricLoader.getInstance().getAllMods() + "\n";
         debugInfo[1] += "Resource packs: " + ResourcePackManager.listPacks(MinecraftClient.getInstance().getResourcePackManager().getEnabledProfiles()) + "\n";
 
