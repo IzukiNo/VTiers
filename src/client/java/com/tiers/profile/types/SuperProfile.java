@@ -382,6 +382,9 @@ public class SuperProfile {
 
     public void setOnUpdate(Runnable onUpdate) {
         this.onUpdate = onUpdate;
+        if (status != Status.SEARCHING && onUpdate != null) {
+            onUpdate.run();
+        }
     }
 
     @Override
