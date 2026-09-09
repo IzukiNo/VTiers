@@ -34,14 +34,20 @@ public abstract class ModifyTabClientMixin {
 
     @ModifyReturnValue(at = @At("RETURN"), method = "getDisplayName")
     private Text modifyPlayerName(Text original) {
-        if (!TiersClient.toggleMod || !TiersClient.toggleTab || original == null)
+        if (!TiersClient.toggleMod || !TiersClient.toggleTab)
             return original;
 
-        if (original == tiers_lastOriginal && tiers_cacheVersion == TiersClient.cacheVersion)
+        Text baseText = original != null ? original : Text.literal(getProfile().name());
+
+        if (baseText == tiers_lastOriginal && tiers_cacheVersion == TiersClient.cacheVersion)
             return tiers_cached;
         tiers_cacheVersion = TiersClient.cacheVersion;
-        tiers_lastOriginal = original;
+        tiers_lastOriginal = baseText;
 
-        return tiers_cached = TiersClient.addGetPlayer(getProfile().name(), false).deepReplace(original);
+        Text replaced = TiersClient.addGetPlayer(getProfile().name(), false).deepReplace(baseText);
+        if (original == null && replaced == baseText)
+            return null;
+
+        return tiers_cached = replaced;
     }
 }

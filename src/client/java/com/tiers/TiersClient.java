@@ -112,12 +112,18 @@ public class TiersClient implements ClientModInitializer {
     }
 
     public static PlayerProfile addGetPlayer(String playerName, boolean priority) {
+        if (playerName == null)
+            return null;
+
         PlayerProfile gotFromReady = readyPlayerProfiles.get(playerName);
+        if (gotFromReady == null)
+            gotFromReady = readyPlayerProfiles.get(playerName.toLowerCase(Locale.ROOT));
+
         if (gotFromReady != null)
             return gotFromReady;
 
         for (PlayerProfile playerProfile : playerProfiles) {
-            if (playerProfile.targetName.equalsIgnoreCase(playerName)) {
+            if (playerProfile.targetName.equalsIgnoreCase(playerName) || (playerProfile.inGameName != null && playerProfile.inGameName.equalsIgnoreCase(playerName))) {
                 if (priority)
                     PlayerProfileQueue.changeToFirstInQueue(playerProfile);
                 return playerProfile;

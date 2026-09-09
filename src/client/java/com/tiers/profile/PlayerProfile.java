@@ -304,6 +304,11 @@ public class PlayerProfile {
         updateTierlistProfiles(0);
         status = Status.READY;
         readyPlayerProfiles.put(targetName, this);
+        readyPlayerProfiles.put(targetName.toLowerCase(java.util.Locale.ROOT), this);
+        if (inGameName != null) {
+            readyPlayerProfiles.put(inGameName, this);
+            readyPlayerProfiles.put(inGameName.toLowerCase(java.util.Locale.ROOT), this);
+        }
     }
 
     private void failedRequest() {
@@ -330,7 +335,14 @@ public class PlayerProfile {
                 TiersClient.showUpdatedPlayerProfile(this, false);
 
             if (mode == 0 || mode == 2) {
-                profileVNList = new VNListProfile("https://api.vnlist.asia/v2/user/", uuid, extra);
+                VNListProfile vnProfile = new VNListProfile("https://api.vnlist.asia/v2/user/", uuid, extra);
+                vnProfile.setOnUpdate(() -> {
+                    if (profilePvPTiers != null && vnProfile.originalJson != null) {
+                        profilePvPTiers.parseJson(vnProfile.originalJson);
+                    }
+                    updateAppendingText();
+                });
+                profileVNList = vnProfile;
                 profilePvPTiers = new PvPTiersProfile((String) null);
             }
 
