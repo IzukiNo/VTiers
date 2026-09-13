@@ -1,0 +1,11 @@
+package com.vtiers.profile;
+
+public enum Status {
+    SEARCHING,
+    NOT_EXISTING,
+    NOT_PLAYER,
+    TIMEOUTED,
+    API_ISSUE,
+    RATE_LIMITED,
+    READY
+}

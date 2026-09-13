@@ -21,7 +21,7 @@ repositories {
 loom {
     splitEnvironmentSourceSets()
     mods {
-        "tiers" {
+        "vtiers" {
             sourceSet sourceSets.main
             sourceSet sourceSets.client
         }
