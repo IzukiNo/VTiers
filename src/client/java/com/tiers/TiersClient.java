@@ -301,7 +301,7 @@ public class TiersClient implements ClientModInitializer {
             sendMessageToPlayer(Text.literal("- Report a bug: ").append(Text.literal("VTiers GitHub issues").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/IzukiNo/VTiers/issues"))))), false);
             sendMessageToPlayer(Text.literal("- It's not advisable to create tickets in VNList support"), false);
             sendMessageToPlayer(Text.literal("- ").append(Text.literal("Changelogs").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/IzukiNo/VTiers/wiki/Version-changelogs"))))), false);
-            sendMessageToPlayer(Text.literal("- ").append(Text.literal("Modrinth page").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://modrinth.com/mod/tiers"))))), false);
+            sendMessageToPlayer(Text.literal("- ").append(Text.literal("Modrinth page").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://modrinth.com/mod/vtiers"))))), false);
 
             String[] debugInfo = getDebugInfo();
             sendMessageToPlayer(Icons.colorText("\n" + debugInfo[0], Colors.LIGHT_YELLOW), false);
