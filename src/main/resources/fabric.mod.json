@@ -22,14 +22,14 @@
       }
     }
   },
-  "icon": "assets/tiers/icon.png",
+  "icon": "assets/vtiers/icon.png",
   "entrypoints": {
-    "client": ["com.tiers.TiersClient"],
-    "modmenu": ["com.tiers.misc.ModMenuIntegration"]
+    "client": ["com.vtiers.VTiersClient"],
+    "modmenu": ["com.vtiers.misc.ModMenuIntegration"]
   },
   "mixins": [
     {
-      "config": "tiers.client.mixins.json",
+      "config": "vtiers.client.mixins.json",
       "environment": "client"
     }
   ],

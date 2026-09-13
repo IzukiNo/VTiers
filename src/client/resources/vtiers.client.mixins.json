@@ -1,0 +1,17 @@
+{
+  "required": true,
+  "package": "com.vtiers.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "AddRenderedPlayersClientMixin",
+    "ModifyNametagsClientMixin",
+    "ModifyTextDisplaysClientMixin",
+    "ModifyTabClientMixin",
+    "ModifyChatClientMixin",
+    "DataTrackerAccessor",
+    "TextDisplayAccessor"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
