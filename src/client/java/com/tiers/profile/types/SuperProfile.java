@@ -122,11 +122,12 @@ public class SuperProfile {
         this.apiUrl = apiUrl;
         this.uuid = uuid;
 
-        if (numberOfRequests >= 5 || status != Status.SEARCHING) {
+        if (numberOfRequests >= 5 || (status != Status.SEARCHING && status != Status.RATE_LIMITED)) {
             status = Status.TIMEOUTED;
             failedRequest();
             return;
         }
+        status = Status.SEARCHING;
 
         numberOfRequests++;
 
@@ -141,6 +142,13 @@ public class SuperProfile {
             int statusCode = response.statusCode();
             if (statusCode == 404) {
                 status = Status.NOT_EXISTING;
+                return;
+            } else if (statusCode == 429) {
+                status = Status.RATE_LIMITED;
+                CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS).execute(() -> {
+                    status = Status.SEARCHING;
+                    buildRequest(apiUrl, uuid, extra);
+                });
                 return;
             } else if (statusCode == 502 || statusCode == 525) {
                 numberOfRequests++;
@@ -335,11 +343,11 @@ public class SuperProfile {
             if (this instanceof PvPTiersProfile) {
                 failedPvPTiersRequestsLastMinute.incrementAndGet();
                 if (failedPvPTiersRequests.incrementAndGet() % 20 == 0)
-                    message = "[Tiers] PvPTiers might be down. " + failedPvPTiersRequests + " searches (out of " + PvPTiersRequests + ") failed so far. Use '/tiers -status' for more info";
+                    message = "[VTiers] PvPTiers might be down. " + failedPvPTiersRequests + " searches (out of " + PvPTiersRequests + ") failed so far. Use '/vtiers -status' for more info";
             } else if (this instanceof VNListProfile) {
                 failedVNListRequestsLastMinute.incrementAndGet();
                 if (failedVNListRequests.incrementAndGet() % 20 == 0)
-                    message = "[Tiers] VNList might be down. " + failedVNListRequests + " searches (out of " + VNListRequests + ") failed so far. Use '/tiers -status' for more info";
+                    message = "[VTiers] VNList might be down. " + failedVNListRequests + " searches (out of " + VNListRequests + ") failed so far. Use '/vtiers -status' for more info";
             }
         }
 

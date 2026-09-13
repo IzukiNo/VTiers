@@ -6,5 +6,6 @@ public enum Status {
     NOT_PLAYER,
     TIMEOUTED,
     API_ISSUE,
+    RATE_LIMITED,
     READY
 }

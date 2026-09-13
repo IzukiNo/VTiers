@@ -24,13 +24,10 @@ import java.net.HttpURLConnection;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -65,9 +62,10 @@ public class PlayerProfile {
     private int numberOfRequests;
     private final boolean regular;
 
-    private static final String UUID_API_1 = "https://playerdb.co/api/player/minecraft/";
-    private static final String UUID_API_2 = "https://api.mojang.com/users/profiles/minecraft/";
-    private static final String UUID_API_3 = "https://api.minecraftservices.com/minecraft/profile/lookup/name/";
+    // Unused Mojang / PlayerDB API endpoints (bypassed in favor of direct VNList username search)
+    // private static final String UUID_API_1 = "https://playerdb.co/api/player/minecraft/";
+    // private static final String UUID_API_2 = "https://api.mojang.com/users/profiles/minecraft/";
+    // private static final String UUID_API_3 = "https://api.minecraftservices.com/minecraft/profile/lookup/name/";
     private static boolean forceNewRequest;
 
     public PlayerProfile(String name, boolean regular) {
@@ -149,83 +147,20 @@ public class PlayerProfile {
         if (status != Status.SEARCHING)
             return;
 
-        if (numberOfRequests >= 3) {
-            buildRequest(UUID_API_2);
-            return;
+        updateTierlistProfiles(0);
+        status = Status.READY;
+        readyPlayerProfiles.put(targetName, this);
+        readyPlayerProfiles.put(targetName.toLowerCase(java.util.Locale.ROOT), this);
+        if (inGameName != null) {
+            readyPlayerProfiles.put(inGameName, this);
+            readyPlayerProfiles.put(inGameName.toLowerCase(java.util.Locale.ROOT), this);
         }
-
-        numberOfRequests++;
-
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(UUID_API_1 + name))
-                .header("User-Agent", userAgent)
-                .timeout(Duration.ofSeconds(2))
-                .GET()
-                .build();
-
-        httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
-            int statusCode = response.statusCode();
-
-            if (statusCode == 400 || statusCode == 500) {
-                status = Status.NOT_EXISTING;
-                return;
-            } else if (statusCode != 200) {
-                buildRequest(UUID_API_2);
-                return;
-            }
-            parseJson(response.body());
-        }).exceptionally(ignored -> {
-            CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(this::buildRequest);
-            return null;
-        });
     }
 
-    public void buildRequest(String apiUrl) {
-        if (numberOfRequests >= 12 || status != Status.SEARCHING) {
-            status = Status.TIMEOUTED;
-            return;
-        }
-
-        numberOfRequests++;
-
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(apiUrl + name))
-                .header("User-Agent", userAgent)
-                .timeout(Duration.ofSeconds(2))
-                .GET()
-                .build();
-
-        httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
-            if (response.body().contains("minecraft/profile/lookup")) {
-                status = Status.API_ISSUE;
-                return;
-            }
-
-            int statusCode = response.statusCode();
-
-            if (statusCode == 404 || statusCode == 400) {
-                status = Status.NOT_EXISTING;
-                return;
-            } else if (statusCode == 403) {
-                CompletableFuture.delayedExecutor(50, TimeUnit.MILLISECONDS).execute(() -> buildRequest(UUID_API_3));
-                return;
-            } else if (statusCode != 200) {
-                long delay = switch (numberOfRequests) {
-                    case 1 -> 50;
-                    case 2, 3 -> 100;
-                    case 4, 5 -> 400;
-                    case 6, 7 -> 900;
-                    default -> 1500;
-                };
-                CompletableFuture.delayedExecutor(delay, TimeUnit.MILLISECONDS).execute(() -> buildRequest(apiUrl));
-                return;
-            }
-            parseJson(response.body());
-        }).exceptionally(ignored -> {
-            CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> buildRequest(apiUrl));
-            return null;
-        });
-    }
+    // Unused overload (Mojang API lookup bypassed)
+    // public void buildRequest(String apiUrl) {
+    //     buildRequest();
+    // }
 
     public void savePlayerImage() {
         String apiUrl = "https://mc-heads.net/body/";
@@ -262,6 +197,7 @@ public class PlayerProfile {
         });
     }
 
+    /* Unused Mojang API response parser (bypassed in favor of direct VNList username search)
     private void parseJson(String json) {
         if (JsonParser.parseString(json).isJsonNull()) {
             status = Status.API_ISSUE;
@@ -271,10 +207,6 @@ public class PlayerProfile {
         JsonObject jsonObject = JsonParser.parseString(json).getAsJsonObject();
 
         if (jsonObject.has("code") && jsonObject.has("data") && jsonObject.has("success")) {
-            if (!jsonObject.get("success").getAsString().contains("true")) {
-                buildRequest(UUID_API_2);
-                return;
-            }
             JsonObject data = jsonObject.getAsJsonObject("data");
             if (data.has("player")) {
                 JsonObject player = data.getAsJsonObject("player");
@@ -289,7 +221,18 @@ public class PlayerProfile {
         }
 
         if (uuid.isEmpty()) {
-            status = Status.NOT_EXISTING;
+            if (inGameName != null && !inGameName.isEmpty()) {
+                name = inGameName;
+            }
+            targetName = (name != null && !name.isEmpty()) ? name : inGameName;
+            updateTierlistProfiles(0);
+            status = Status.READY;
+            readyPlayerProfiles.put(targetName, this);
+            readyPlayerProfiles.put(targetName.toLowerCase(java.util.Locale.ROOT), this);
+            if (inGameName != null && !inGameName.isEmpty()) {
+                readyPlayerProfiles.put(inGameName, this);
+                readyPlayerProfiles.put(inGameName.toLowerCase(java.util.Locale.ROOT), this);
+            }
             return;
         }
 
@@ -310,6 +253,7 @@ public class PlayerProfile {
             readyPlayerProfiles.put(inGameName.toLowerCase(java.util.Locale.ROOT), this);
         }
     }
+    */
 
     private void failedRequest() {
         synchronized (PlayerProfile.class) {
@@ -335,7 +279,7 @@ public class PlayerProfile {
                 TiersClient.showUpdatedPlayerProfile(this, false);
 
             if (mode == 0 || mode == 2) {
-                VNListProfile vnProfile = new VNListProfile("https://api.vnlist.asia/v2/user/", uuid, extra);
+                VNListProfile vnProfile = new VNListProfile("https://api.vnlist.asia/v2/user/name/", name, extra);
                 vnProfile.setOnUpdate(() -> {
                     if (profilePvPTiers != null && vnProfile.originalJson != null) {
                         profilePvPTiers.parseJson(vnProfile.originalJson);
