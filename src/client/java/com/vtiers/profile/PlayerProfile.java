@@ -3,6 +3,8 @@ package com.vtiers.profile;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.vtiers.VTiersClient;
+import com.vtiers.VTiersClient.DisplayStatus;
+import com.vtiers.VTiersClient.ModesTierDisplay;
 import com.vtiers.misc.Mode;
 import com.vtiers.profile.types.PvPTiersProfile;
 import com.vtiers.profile.types.SuperProfile;
@@ -10,12 +12,11 @@ import com.vtiers.profile.types.VNListProfile;
 import com.vtiers.textures.ColorControl;
 import com.vtiers.textures.Icons;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 import javax.imageio.ImageIO;
 import java.io.File;
 import java.io.IOException;
@@ -54,10 +55,10 @@ public class PlayerProfile {
     public PvPTiersProfile profilePvPTiers;
     public VNListProfile profileVNList;
 
-    public Text toAppendLeft = Text.empty();
-    public Text toAppendRight = Text.empty();
-    private Text fullName;
-    private Text deepReplaceName;
+    public Component toAppendLeft = Component.empty();
+    public Component toAppendRight = Component.empty();
+    private Component fullName;
+    private Component deepReplaceName;
 
     private int numberOfRequests;
     private final boolean regular;
@@ -116,9 +117,9 @@ public class PlayerProfile {
         Path path = FabricLoader.getInstance().getGameDir().resolve("cache/vtiers/06ec3577329945fabbdf613b1f86c8ab.png");
 
         try {
-            var resourceOpt = MinecraftClient.getInstance().getResourceManager().getResource(Identifier.of("minecraft", "textures/default.png"));
+            var resourceOpt = Minecraft.getInstance().getResourceManager().getResource(Identifier.fromNamespaceAndPath("minecraft", "textures/default.png"));
             if (resourceOpt.isPresent()) {
-                try (InputStream inputStream = resourceOpt.get().getInputStream()) {
+                try (InputStream inputStream = resourceOpt.get().open()) {
                     if (inputStream != null) {
                         Files.createDirectories(path.getParent());
                         Files.copy(inputStream, path, StandardCopyOption.REPLACE_EXISTING);
@@ -305,8 +306,8 @@ public class PlayerProfile {
     }
 
     public void updateAppendingText() {
-        toAppendRight = Text.empty();
-        toAppendLeft = Text.empty();
+        toAppendRight = Component.empty();
+        toAppendLeft = Component.empty();
 
         SuperProfile activeProfile = profileVNList != null ? profileVNList : profilePvPTiers;
 
@@ -318,38 +319,38 @@ public class PlayerProfile {
         cachesDirty = true;
     }
 
-    public Text getFullName() {
-        Text playerText = nameChanged ? Text.of(inGameName + " (AKA " + name + ")") : Text.of(name);
+    public Component getFullName() {
+        Component playerText = nameChanged ? Component.nullToEmpty(inGameName + " (AKA " + name + ")") : Component.nullToEmpty(name);
 
         if (!toggleMod)
             return playerText;
 
-        return Text.empty()
+        return Component.empty()
                 .append(toAppendLeft.copy())
                 .append(playerText)
                 .append(toAppendRight.copy());
     }
 
-    public Text getFullName(Text original) {
+    public Component getFullName(Component original) {
         if (status != Status.READY)
             return original;
 
-        return fullName = Text.empty()
-                .append(Text.literal("\u200C"))
+        return fullName = Component.empty()
+                .append(Component.literal("\u200C"))
                 .append(toAppendLeft.copy())
                 .append(original.copy())
                 .append(toAppendRight.copy())
-                .append(Text.literal("\u200C"));
+                .append(Component.literal("\u200C"));
     }
 
-    public static Text stripTierTags(Text original) {
+    public static Component stripTierTags(Component original) {
         if (original == null)
             return null;
         String full = original.getString();
         if (!full.contains("\u200C"))
             return original;
 
-        MutableText result = Text.empty();
+        MutableComponent result = Component.empty();
         original.visit((style, string) -> {
             String clean = string.replace("\u200C", "");
 
@@ -367,7 +368,7 @@ public class PlayerProfile {
             }
 
             if (!clean.isEmpty())
-                result.append(Text.literal(clean).setStyle(style));
+                result.append(Component.literal(clean).setStyle(style));
 
             return Optional.empty();
         }, Style.EMPTY);
@@ -375,8 +376,8 @@ public class PlayerProfile {
         return result;
     }
 
-    private Text updateProfileNameRight(SuperProfile superProfile, Mode activeMode) {
-        MutableText returnValue = Text.empty();
+    private Component updateProfileNameRight(SuperProfile superProfile, Mode activeMode) {
+        MutableComponent returnValue = Component.empty();
 
         if (superProfile != null && superProfile.status == Status.READY) {
             GameMode shown = superProfile.getGameMode(activeMode);
@@ -393,17 +394,17 @@ public class PlayerProfile {
             if (shown == null || shown.status != Status.READY)
                 return returnValue;
 
-            MutableText separator = Text.literal(" | ").setStyle(toggleAdaptiveSeparator ? shown.displayedTier.getStyle() : Style.EMPTY.withColor(ColorControl.getColor("static_separator")));
-            returnValue.append(Text.empty().append(separator).append(shown.displayedTier));
+            MutableComponent separator = Component.literal(" | ").setStyle(toggleAdaptiveSeparator ? shown.displayedTier.getStyle() : Style.EMPTY.withColor(ColorControl.getColor("static_separator")));
+            returnValue.append(Component.empty().append(separator).append(shown.displayedTier));
 
             if (toggleIcons)
-                returnValue.append(Text.literal(" ").append(shown.gamemode.getIconTag()));
+                returnValue.append(Component.literal(" ").append(shown.gamemode.getIconTag()));
         }
         return returnValue;
     }
 
-    private Text updateProfileNameLeft(SuperProfile superProfile, Mode activeMode) {
-        MutableText returnValue = Text.empty();
+    private Component updateProfileNameLeft(SuperProfile superProfile, Mode activeMode) {
+        MutableComponent returnValue = Component.empty();
 
         if (superProfile != null && superProfile.status == Status.READY) {
             GameMode shown = superProfile.getGameMode(activeMode);
@@ -420,11 +421,11 @@ public class PlayerProfile {
             if (shown == null || shown.status != Status.READY)
                 return returnValue;
 
-            MutableText separator = Text.literal(" | ").setStyle(toggleAdaptiveSeparator ? shown.displayedTier.getStyle() : Style.EMPTY.withColor(ColorControl.getColor("static_separator")));
+            MutableComponent separator = Component.literal(" | ").setStyle(toggleAdaptiveSeparator ? shown.displayedTier.getStyle() : Style.EMPTY.withColor(ColorControl.getColor("static_separator")));
 
             if (toggleIcons)
-                returnValue = Text.empty().append(shown.gamemode.getIconTag()).append(" ");
-            returnValue.append(Text.empty().append(shown.displayedTier).append(separator));
+                returnValue = Component.empty().append(shown.gamemode.getIconTag()).append(" ");
+            returnValue.append(Component.empty().append(shown.displayedTier).append(separator));
         }
         return returnValue;
     }
@@ -459,7 +460,7 @@ public class PlayerProfile {
         return true;
     }
 
-    public static Text getFullyReplaced(Text original) {
+    public static Component getFullyReplaced(Component original) {
         String originalString = original.getString();
         for (PlayerProfile playerProfile : VTiersClient.playerProfiles)
             if (playerProfile.status == Status.READY && originalString.contains(playerProfile.targetName))
@@ -468,7 +469,7 @@ public class PlayerProfile {
         return original;
     }
 
-    public Text deepReplace(Text original) {
+    public Component deepReplace(Component original) {
         if (status == Status.NOT_PLAYER)
             return getFullyReplaced(original);
 
@@ -508,7 +509,7 @@ public class PlayerProfile {
         if (matches.isEmpty())
             return original;
 
-        MutableText result = Text.empty();
+        MutableComponent result = Component.empty();
         int i = 0;
         int matchIndex = 0;
 
@@ -516,7 +517,7 @@ public class PlayerProfile {
             if (matchIndex < matches.size() && i == matches.get(matchIndex)[0]) {
                 int end = matches.get(matchIndex)[1];
 
-                MutableText namePart = Text.empty();
+                MutableComponent namePart = Component.empty();
                 appendChunkedText(characters, i, end, namePart);
 
                 result.append(getFullName(namePart));
@@ -534,7 +535,7 @@ public class PlayerProfile {
         return deepReplaceName = result;
     }
 
-    private void appendChunkedText(ArrayList<StyledChar> characters, int start, int end, MutableText dest) {
+    private void appendChunkedText(ArrayList<StyledChar> characters, int start, int end, MutableComponent dest) {
         if (start >= end)
             return;
 
@@ -545,7 +546,7 @@ public class PlayerProfile {
             StyledChar character = characters.get(i);
 
             if (!character.style.equals(currentStyle)) {
-                dest.append(Text.literal(chunkBuilder.toString()).setStyle(currentStyle));
+                dest.append(Component.literal(chunkBuilder.toString()).setStyle(currentStyle));
                 chunkBuilder.setLength(0);
                 currentStyle = character.style;
             }
@@ -553,7 +554,7 @@ public class PlayerProfile {
         }
 
         if (!chunkBuilder.isEmpty())
-            dest.append(Text.literal(chunkBuilder.toString()).setStyle(currentStyle));
+            dest.append(Component.literal(chunkBuilder.toString()).setStyle(currentStyle));
     }
 
     private record StyledChar(char character, Style style) {

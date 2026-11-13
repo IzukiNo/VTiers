@@ -2,29 +2,29 @@ package com.vtiers.mixin.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.vtiers.VTiersClient;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 
-@Mixin(PlayerEntity.class)
+@Mixin(Player.class)
 public abstract class ModifyNametagsClientMixin {
     @Shadow
-    public abstract String getNameForScoreboard();
+    public abstract String getScoreboardName();
 
     @Unique
     private int vtiers_cacheVersion;
 
     @Unique
-    private Text vtiers_lastOriginal;
+    private Component vtiers_lastOriginal;
 
     @Unique
-    private Text vtiers_cached;
+    private Component vtiers_cached;
 
     @ModifyReturnValue(at = @At("RETURN"), method = "getDisplayName")
-    private Text modifyDisplayName(Text original) {
+    private Component modifyDisplayName(Component original) {
         if (!VTiersClient.toggleMod)
             return original;
 
@@ -33,6 +33,6 @@ public abstract class ModifyNametagsClientMixin {
         vtiers_cacheVersion = VTiersClient.cacheVersion;
         vtiers_lastOriginal = original;
 
-        return vtiers_cached = VTiersClient.addGetPlayer(getNameForScoreboard(), false).getFullName(original);
+        return vtiers_cached = VTiersClient.addGetPlayer(getScoreboardName(), false).getFullName(original);
     }
 }

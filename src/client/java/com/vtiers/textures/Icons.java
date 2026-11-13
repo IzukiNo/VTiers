@@ -1,32 +1,32 @@
 package com.vtiers.textures;
 
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
 
 public class Icons {
-    public static Identifier identifierMCTiers = Identifier.of("minecraft", "gamemodes/pvptiers");
-    public static Identifier identifierPvPTiers = Identifier.of("minecraft", "gamemodes/pvptiers");
-    public static Identifier identifierVNList = Identifier.of("minecraft", "gamemodes/pvptiers");
-    public static final Identifier identifierSubtiers = Identifier.of("minecraft", "gamemodes/subtiers");
+    public static Identifier identifierMCTiers = Identifier.fromNamespaceAndPath("minecraft", "gamemodes/pvptiers");
+    public static Identifier identifierPvPTiers = Identifier.fromNamespaceAndPath("minecraft", "gamemodes/pvptiers");
+    public static Identifier identifierVNList = Identifier.fromNamespaceAndPath("minecraft", "gamemodes/pvptiers");
+    public static final Identifier identifierSubtiers = Identifier.fromNamespaceAndPath("minecraft", "gamemodes/subtiers");
 
-    public static Identifier identifierMCTiersTags = Identifier.of("minecraft", "gamemodes/pvptiers-tags");
-    public static Identifier identifierPvPTiersTags = Identifier.of("minecraft", "gamemodes/pvptiers-tags");
-    public static Identifier identifierVNListTags = Identifier.of("minecraft", "gamemodes/pvptiers-tags");
-    public static final Identifier identifierSubtiersTags = Identifier.of("minecraft", "gamemodes/subtiers-tags");
+    public static Identifier identifierMCTiersTags = Identifier.fromNamespaceAndPath("minecraft", "gamemodes/pvptiers-tags");
+    public static Identifier identifierPvPTiersTags = Identifier.fromNamespaceAndPath("minecraft", "gamemodes/pvptiers-tags");
+    public static Identifier identifierVNListTags = Identifier.fromNamespaceAndPath("minecraft", "gamemodes/pvptiers-tags");
+    public static final Identifier identifierSubtiersTags = Identifier.fromNamespaceAndPath("minecraft", "gamemodes/subtiers-tags");
 
-    public static Text GLOBE = Text.literal("\uF000").setStyle(Style.EMPTY.withColor(ColorControl.getColorMinecraftStandard("region")).withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static Text OVERALL = Text.literal("\uF001").setStyle(Style.EMPTY.withColor(ColorControl.getColorMinecraftStandard("overall")).withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static final Text CYCLE = Text.literal("\uF002").setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static final Text ICONS = Text.literal("\uF004").setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static final Text ICONS_DISABLED = Text.literal("\uF005").setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static final Text TAB = Text.literal("\uF006").setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static final Text TAB_DISABLED = Text.literal("\uF007").setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static final Text CHAT = Text.literal("\uF008").setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static final Text CHAT_DISABLED = Text.literal("\uF009").setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static final Text NAMEMC = Text.literal("\uF00A").setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-    public static final Text DISCORD = Text.literal("\uF00B").setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
+    public static Component GLOBE = Component.literal("\uF000").setStyle(Style.EMPTY.withColor(ColorControl.getColorMinecraftStandard("region")).withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static Component OVERALL = Component.literal("\uF001").setStyle(Style.EMPTY.withColor(ColorControl.getColorMinecraftStandard("overall")).withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static final Component CYCLE = Component.literal("\uF002").setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static final Component ICONS = Component.literal("\uF004").setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static final Component ICONS_DISABLED = Component.literal("\uF005").setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static final Component TAB = Component.literal("\uF006").setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static final Component TAB_DISABLED = Component.literal("\uF007").setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static final Component CHAT = Component.literal("\uF008").setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static final Component CHAT_DISABLED = Component.literal("\uF009").setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static final Component NAMEMC = Component.literal("\uF00A").setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
+    public static final Component DISCORD = Component.literal("\uF00B").setStyle(Style.EMPTY.withFont(new FontDescription.Resource(Identifier.fromNamespaceAndPath("minecraft", "misc"))));
 
     public enum Type {
         CLASSIC,
@@ -34,11 +34,11 @@ public class Icons {
         MCTIERS
     }
 
-    public static Text colorText(String string, String color) {
-        return Text.literal(string).setStyle(Style.EMPTY.withColor(ColorControl.getColor(color)));
+    public static Component colorText(String string, String color) {
+        return Component.literal(string).setStyle(Style.EMPTY.withColor(ColorControl.getColor(color)));
     }
 
-    public static Text colorText(String string, int color) {
-        return Text.literal(string).setStyle(Style.EMPTY.withColor(color));
+    public static Component colorText(String string, int color) {
+        return Component.literal(string).setStyle(Style.EMPTY.withColor(color));
     }
 }

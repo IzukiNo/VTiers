@@ -2,10 +2,10 @@ package com.vtiers.profile.types;
 
 import com.vtiers.misc.Mode;
 import com.vtiers.profile.GameMode;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public class VNListProfile extends SuperProfile {
-    public static final Identifier VNLIST_IMAGE = Identifier.of("minecraft", "textures/vnlist_logo.png");
+    public static final Identifier VNLIST_IMAGE = Identifier.fromNamespaceAndPath("minecraft", "textures/vnlist_logo.png");
 
     public VNListProfile(String apiUrl, String uuid, String extra) {
         super();

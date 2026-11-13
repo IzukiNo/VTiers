@@ -7,9 +7,6 @@ import com.vtiers.misc.Mode;
 import com.vtiers.profile.GameMode;
 import com.vtiers.profile.Status;
 import com.vtiers.textures.Icons;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-
 import java.net.URI;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -17,6 +14,8 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.CommonColors;
 
 import static com.vtiers.VTiersClient.*;
 
@@ -66,10 +65,10 @@ public class SuperProfile {
     private int points;
     private int overallPosition;
 
-    public Text displayedRegion;
-    public Text displayedOverall;
-    public Text overallTooltip;
-    public Text regionTooltip;
+    public Component displayedRegion;
+    public Component displayedOverall;
+    public Component overallTooltip;
+    public Component regionTooltip;
 
     public final ArrayList<GameMode> gameModes = new ArrayList<>();
     public GameMode highest;
@@ -122,7 +121,7 @@ public class SuperProfile {
 
         lastDownMessageAt = now;
         numberOfMessages++;
-        sendMessageToPlayer(Icons.colorText(message, Colors.YELLOW), false);
+        sendMessageToPlayer(Icons.colorText(message, CommonColors.YELLOW), false);
     }
 
     private static void updateAndRecoverFailedRequests() {
@@ -428,7 +427,7 @@ public class SuperProfile {
         return highest;
     }
 
-    private Text getRegionText() {
+    private Component getRegionText() {
         if (region.equalsIgnoreCase("EU"))
             return Icons.colorText(region, "eu");
         else if (region.equalsIgnoreCase("NA"))
@@ -450,7 +449,7 @@ public class SuperProfile {
         return Icons.colorText("Unknown", "unknown");
     }
 
-    private Text getRegionTooltip() {
+    private Component getRegionTooltip() {
         if (region.equalsIgnoreCase("EU"))
             return Icons.colorText("Europe", "eu");
         else if (region.equalsIgnoreCase("NA"))
@@ -472,7 +471,7 @@ public class SuperProfile {
         return Icons.colorText("Unknown", "unknown");
     }
 
-    private Text getOverallText() {
+    private Component getOverallText() {
         String positionString = "#" + overallPosition;
         if (!(this instanceof PvPTiersProfile) && !(this instanceof VNListProfile) && points >= 250) return Icons.colorText(positionString, "master");
         else if ((this instanceof PvPTiersProfile || this instanceof VNListProfile) && points >= 200) return Icons.colorText(positionString, "master");
@@ -484,7 +483,7 @@ public class SuperProfile {
         return Icons.colorText(positionString, "rookie");
     }
 
-    private Text getOverallTooltip() {
+    private Component getOverallTooltip() {
         String overallTooltip = "Combat ";
 
         if (!(this instanceof PvPTiersProfile) && !(this instanceof VNListProfile) && points >= 400) overallTooltip += "Grandmaster";
@@ -497,7 +496,7 @@ public class SuperProfile {
         else overallTooltip = "Rookie";
         overallTooltip += "\n\nPoints: " + points;
 
-        return Text.literal(overallTooltip).setStyle(displayedOverall.getStyle());
+        return Component.literal(overallTooltip).setStyle(displayedOverall.getStyle());
     }
 
     private void failedRequest() {

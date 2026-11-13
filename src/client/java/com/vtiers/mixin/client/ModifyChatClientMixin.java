@@ -2,16 +2,16 @@ package com.vtiers.mixin.client;
 
 import com.vtiers.VTiersClient;
 import com.vtiers.profile.PlayerProfile;
-import net.minecraft.client.gui.hud.ChatHud;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-@Mixin(ChatHud.class)
+@Mixin(ChatComponent.class)
 public class ModifyChatClientMixin {
-    @ModifyVariable(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/text/Text;Lnet/minecraft/network/message/MessageSignatureData;Lnet/minecraft/client/gui/hud/MessageIndicator;)V", argsOnly = true)
-    private Text addMessage(Text original) {
+    @ModifyVariable(at = @At("HEAD"), method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/multiplayer/chat/GuiMessageSource;Lnet/minecraft/client/multiplayer/chat/GuiMessageTag;)V", argsOnly = true)
+    private Component addMessage(Component original) {
         if (!VTiersClient.toggleMod)
             return original;
 

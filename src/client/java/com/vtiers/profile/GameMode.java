@@ -3,13 +3,12 @@ package com.vtiers.profile;
 import com.google.gson.JsonObject;
 import com.vtiers.misc.Mode;
 import com.vtiers.textures.ColorControl;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Locale;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 public class GameMode {
     public Status status = Status.SEARCHING;
@@ -18,12 +17,12 @@ public class GameMode {
     private String peakTier;
     private String attained;
 
-    public Text displayedTier;
+    public Component displayedTier;
     private String displayedTierUnformatted;
-    public Text displayedPeakTier;
+    public Component displayedPeakTier;
     private String displayedPeakTierUnformatted;
-    public Text tierTooltip;
-    public Text peakTierTooltip;
+    public Component tierTooltip;
+    public Component peakTierTooltip;
 
     public final Mode gamemode;
     public final String parsingName;
@@ -71,14 +70,14 @@ public class GameMode {
         displayedTierUnformatted += pos.equalsIgnoreCase("0") ? "HT" : "LT";
         displayedTierUnformatted += tier;
 
-        displayedTier = Text.literal(displayedTierUnformatted).setStyle(Style.EMPTY.withColor(getTierColor(displayedTierUnformatted)));
+        displayedTier = Component.literal(displayedTierUnformatted).setStyle(Style.EMPTY.withColor(getTierColor(displayedTierUnformatted)));
         tierTooltip = getTierTooltip();
 
         if (!tier.equalsIgnoreCase(peakTier) || !(pos.equalsIgnoreCase(peakPos))) {
             displayedPeakTierUnformatted = peakPos.equalsIgnoreCase("0") ? "HT" : "LT";
             displayedPeakTierUnformatted += peakTier;
 
-            displayedPeakTier = Text.literal("(" + displayedPeakTierUnformatted + ")").setStyle(Style.EMPTY.withColor(getTierColor(displayedPeakTierUnformatted)));
+            displayedPeakTier = Component.literal("(" + displayedPeakTierUnformatted + ")").setStyle(Style.EMPTY.withColor(getTierColor(displayedPeakTierUnformatted)));
             peakTierTooltip = getPeakTierTooltip();
 
             hasPeak = true;
@@ -87,7 +86,7 @@ public class GameMode {
         status = Status.READY;
     }
 
-    private Text getTierTooltip() {
+    private Component getTierTooltip() {
         String tierTooltipString = "";
         if (displayedTierUnformatted.contains("R"))
             tierTooltipString += "Retired ";
@@ -104,10 +103,10 @@ public class GameMode {
             }
         }
 
-        return Text.literal(tierTooltipString).setStyle(Style.EMPTY.withColor(getTierColor(displayedTierUnformatted)));
+        return Component.literal(tierTooltipString).setStyle(Style.EMPTY.withColor(getTierColor(displayedTierUnformatted)));
     }
 
-    private Text getPeakTierTooltip() {
+    private Component getPeakTierTooltip() {
         String peakTierTooltipString = "Peak: ";
         if (displayedPeakTierUnformatted.contains("R"))
             peakTierTooltipString += "Retired ";
@@ -118,7 +117,7 @@ public class GameMode {
 
         peakTierTooltipString += "Tier " + peakTier + "\n\nPoints: " + getTierPoints(true);
 
-        return Text.literal(peakTierTooltipString).setStyle(Style.EMPTY.withColor(getTierColor(displayedPeakTierUnformatted)));
+        return Component.literal(peakTierTooltipString).setStyle(Style.EMPTY.withColor(getTierColor(displayedPeakTierUnformatted)));
     }
 
     public int getTierPoints(boolean peak) {

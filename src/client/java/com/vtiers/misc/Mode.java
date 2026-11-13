@@ -1,14 +1,13 @@
 package com.vtiers.misc;
 
 import com.vtiers.textures.Icons;
-import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
-import net.minecraft.text.Text;
-import net.minecraft.util.Colors;
-import net.minecraft.util.Identifier;
-
 import java.util.Arrays;
 import java.util.Locale;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FontDescription;
+import net.minecraft.network.chat.Style;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.CommonColors;
 
 public enum Mode {
     MCTIERS_VANILLA(Category.MCTIERS, "\uF000", "Vanilla"),
@@ -68,27 +67,27 @@ public enum Mode {
         VNLIST
     }
 
-    public Text getIcon() {
+    public Component getIcon() {
         Identifier identifier = switch (category) {
             case MCTIERS -> Icons.identifierMCTiers;
             case PVPTIERS -> Icons.identifierPvPTiers;
             case SUBTIERS -> Icons.identifierSubtiers;
             case VNLIST -> Icons.identifierVNList;
         };
-        return Text.literal(unicode).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(identifier)).withColor(Colors.WHITE));
+        return Component.literal(unicode).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(identifier)).withColor(CommonColors.WHITE));
     }
 
-    public Text getIconTag() {
+    public Component getIconTag() {
         Identifier identifier = switch (category) {
             case MCTIERS -> Icons.identifierMCTiersTags;
             case PVPTIERS -> Icons.identifierPvPTiersTags;
             case SUBTIERS -> Icons.identifierSubtiersTags;
             case VNLIST -> Icons.identifierVNListTags;
         };
-        return Text.literal(unicode).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(identifier)).withColor(Colors.WHITE));
+        return Component.literal(unicode).setStyle(Style.EMPTY.withFont(new FontDescription.Resource(identifier)).withColor(CommonColors.WHITE));
     }
 
-    public Text getTextLabel() {
+    public Component getTextLabel() {
         return Icons.colorText(label, name().toLowerCase(Locale.ROOT));
     }
 

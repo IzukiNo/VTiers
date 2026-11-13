@@ -6,11 +6,6 @@ import com.vtiers.PlayerProfileQueue;
 import com.vtiers.VTiersClient;
 import com.vtiers.profile.PlayerProfile;
 import com.vtiers.screens.ConfigScreen;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.ResourceReloader;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.JsonHelper;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,24 +14,28 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
+import net.minecraft.util.GsonHelper;
 
 import static com.vtiers.VTiersClient.LOGGER;
 
-public class ColorLoader implements ResourceReloader {
-    public static Identifier identifier = Identifier.of("minecraft", "colors/pvptiers.json");
+public class ColorLoader implements PreparableReloadListener {
+    public static Identifier identifier = Identifier.fromNamespaceAndPath("minecraft", "colors/pvptiers.json");
 
     @Override
-    public CompletableFuture<Void> reload(Store store, Executor prepareExecutor, Synchronizer reloadSynchronizer, Executor applyExecutor) {
+    public CompletableFuture<Void> reload(SharedState store, Executor prepareExecutor, PreparationBarrier reloadSynchronizer, Executor applyExecutor) {
         return CompletableFuture.supplyAsync(() -> {
-            if (store.getResourceManager().getResource(identifier).isPresent()) {
+            if (store.resourceManager().getResource(identifier).isPresent()) {
                 try {
-                    return JsonHelper.deserialize(new Gson(), new InputStreamReader(store.getResourceManager().getResource(identifier).get().getInputStream(), StandardCharsets.UTF_8), JsonObject.class);
+                    return GsonHelper.fromJson(new Gson(), new InputStreamReader(store.resourceManager().getResource(identifier).get().open(), StandardCharsets.UTF_8), JsonObject.class);
                 } catch (IOException ignored) {
                     LOGGER.warn("Error loading colors info");
                 }
             }
             return null;
-        }, prepareExecutor).thenCompose(reloadSynchronizer::whenPrepared).thenAcceptAsync(jsonObject -> {
+        }, prepareExecutor).thenCompose(reloadSynchronizer::wait).thenAcceptAsync(jsonObject -> {
             try {
                 if (jsonObject != null) {
                     ColorControl.updateColors(jsonObject);
@@ -46,8 +45,8 @@ public class ColorLoader implements ResourceReloader {
 
                 if (ConfigScreen.ownProfile == null) {
                     String ownName = null;
-                    if (MinecraftClient.getInstance() != null && MinecraftClient.getInstance().getGameProfile() != null) {
-                        ownName = MinecraftClient.getInstance().getGameProfile().name();
+                    if (Minecraft.getInstance() != null && Minecraft.getInstance().getGameProfile() != null) {
+                        ownName = Minecraft.getInstance().getGameProfile().name();
                     }
                     if (ownName != null && !ownName.isEmpty()) {
                         ConfigScreen.ownProfile = new PlayerProfile(ownName, false);

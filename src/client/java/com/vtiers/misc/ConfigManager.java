@@ -6,9 +6,9 @@ import com.vtiers.VTiersClient;
 import com.vtiers.textures.Icons;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.screen.TitleScreen;
-import net.minecraft.client.toast.SystemToast;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.components.toasts.SystemToast;
+import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.network.chat.Component;
 
 import java.io.File;
 import java.io.FileReader;
@@ -82,11 +82,11 @@ public class ConfigManager {
                 if (upgradeAdjustmentDone)
                     return;
 
-                if (minecraftClient.currentScreen instanceof TitleScreen) {
+                if (minecraftClient.screen instanceof TitleScreen) {
                     launchTickCounter++;
 
                     if (launchTickCounter >= 20) {
-                        minecraftClient.getToastManager().add(SystemToast.create(minecraftClient, SystemToast.Type.NARRATOR_TOGGLE, Text.of("Thanks for updating VTiers"), Text.of("Some settings may have changed")));
+                        minecraftClient.getToastManager().addToast(SystemToast.multiline(minecraftClient, SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.nullToEmpty("Thanks for updating VTiers"), Component.nullToEmpty("Some settings may have changed")));
                         VTiersClient.toggleMod = true;
                         VTiersClient.toggleIcons = true;
                         VTiersClient.toggleTab = true;

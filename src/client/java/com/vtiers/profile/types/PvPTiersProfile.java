@@ -2,10 +2,10 @@ package com.vtiers.profile.types;
 
 import com.vtiers.misc.Mode;
 import com.vtiers.profile.GameMode;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public class PvPTiersProfile extends SuperProfile {
-    public static final Identifier PVPTIERS_IMAGE = Identifier.of("minecraft", "textures/pvptiers_logo.png");
+    public static final Identifier PVPTIERS_IMAGE = Identifier.fromNamespaceAndPath("minecraft", "textures/pvptiers_logo.png");
 
     public PvPTiersProfile(String apiUrl, String uuid, String extra) {
         super();
