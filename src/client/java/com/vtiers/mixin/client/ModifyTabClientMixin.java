@@ -29,7 +29,7 @@ public abstract class ModifyTabClientMixin {
     @Inject(at = @At(value = "TAIL"), method = "<init>")
     private void onConstruct(GameProfile profile, boolean secureChatEnforced, CallbackInfo ci) {
         if (VTiersClient.toggleMod)
-            VTiersClient.addGetPlayer(profile.name(), false);
+            VTiersClient.addGetPlayer(profile.getName(), false);
     }
 
     @ModifyReturnValue(at = @At("RETURN"), method = "getDisplayName")
@@ -37,14 +37,14 @@ public abstract class ModifyTabClientMixin {
         if (!VTiersClient.toggleMod || !VTiersClient.toggleTab)
             return original;
 
-        Text baseText = original != null ? original : Text.literal(getProfile().name());
+        Text baseText = original != null ? original : Text.literal(getProfile().getName());
 
         if (baseText == vtiers_lastOriginal && vtiers_cacheVersion == VTiersClient.cacheVersion)
             return vtiers_cached;
         vtiers_cacheVersion = VTiersClient.cacheVersion;
         vtiers_lastOriginal = baseText;
 
-        Text replaced = VTiersClient.addGetPlayer(getProfile().name(), false).deepReplace(baseText);
+        Text replaced = VTiersClient.addGetPlayer(getProfile().getName(), false).deepReplace(baseText);
         if (original == null && replaced == baseText)
             return null;
 

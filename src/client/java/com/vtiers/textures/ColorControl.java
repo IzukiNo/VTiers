@@ -2,7 +2,6 @@ package com.vtiers.textures;
 
 import com.google.gson.JsonObject;
 import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
@@ -23,8 +22,8 @@ public class ColorControl {
             });
         }
 
-        Icons.GLOBE = Text.literal("\uF000").setStyle(Style.EMPTY.withColor(getColorMinecraftStandard("region")).withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
-        Icons.OVERALL = Text.literal("\uF001").setStyle(Style.EMPTY.withColor(getColorMinecraftStandard("overall")).withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "misc"))));
+        Icons.GLOBE = Text.literal("\uF000").setStyle(Style.EMPTY.withColor(getColorMinecraftStandard("region")).withFont(Identifier.of("minecraft", "misc")));
+        Icons.OVERALL = Text.literal("\uF001").setStyle(Style.EMPTY.withColor(getColorMinecraftStandard("overall")).withFont(Identifier.of("minecraft", "misc")));
     }
 
     public static int getColor(String colorName) {

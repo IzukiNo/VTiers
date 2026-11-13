@@ -20,8 +20,8 @@ import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
-import net.fabricmc.fabric.api.resource.v1.pack.PackActivationType;
+import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.minecraft.client.MinecraftClient;
@@ -90,17 +90,17 @@ public class VTiersClient implements ClientModInitializer {
         Optional<ModContainer> modContainer = FabricLoader.getInstance().getModContainer("vtiers");
 
         modContainer.ifPresent(tiers -> {
-            ResourceLoader.registerBuiltinPack(Identifier.of("vtiers", "vtiers-resources"), tiers, Text.of("Resources for VTiers"), PackActivationType.ALWAYS_ENABLED);
+            ResourceManagerHelper.registerBuiltinResourcePack(Identifier.of("vtiers", "vtiers-resources"), tiers, Text.of("Resources for VTiers"), ResourcePackActivationType.ALWAYS_ENABLED);
             userAgent += " v" + tiers.getMetadata().getVersion().getFriendlyString();
         });
 
-        KeyBinding.Category category = KeyBinding.Category.create(Identifier.of("vtiers", "category"));
+        String category = "key.category.vtiers";
         autoDetectKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.vtiers.auto_detect_kit", GLFW.GLFW_KEY_Y, category));
         openClosestPlayerProfile = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.vtiers.open_closest_player_profile", GLFW.GLFW_KEY_H, category));
         cycleRightKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.vtiers.cycle_right_gamemodes", GLFW.GLFW_KEY_I, category));
         cycleLeftKey = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.vtiers.cycle_left_gamemodes", GLFW.GLFW_KEY_U, category));
 
-        ResourceLoader.get(ResourceType.CLIENT_RESOURCES).registerReloader(Identifier.of("vtiers", "color_loader"), new ColorLoader());
+        ResourceManagerHelper.get(ResourceType.CLIENT_RESOURCES).registerReloadListener(new ColorLoader());
         ClientTickEvents.END_CLIENT_TICK.register(VTiersClient::checkKeys);
         ClientTickEvents.END_CLIENT_TICK.register(minecraftClient -> {
             if (toggleAutoKitDetect)
@@ -173,10 +173,10 @@ public class VTiersClient implements ClientModInitializer {
     public static String getNearestPlayerName() {
         MinecraftClient minecraftClient = MinecraftClient.getInstance();
         PlayerEntity self = minecraftClient.player;
-        if (self == null || self.getEntityWorld() == null)
+        if (self == null || self.getWorld() == null)
             return null;
 
-        PlayerEntity playerEntity = self.getEntityWorld().getPlayers().stream()
+        PlayerEntity playerEntity = self.getWorld().getPlayers().stream()
                 .filter(player -> player != self)
                 .filter(player -> self.distanceTo(player) < MinecraftClient.getInstance().gameRenderer.getViewDistanceBlocks())
                 .min(Comparator.comparingDouble(self::distanceTo))
@@ -380,7 +380,7 @@ public class VTiersClient implements ClientModInitializer {
         debugInfo[1] += "Game version: " + MinecraftClient.getInstance().getGameVersion() + " | " + FabricLoader.getInstance().getRawGameVersion() + "\n";
         debugInfo[1] += "Version type: " + MinecraftClient.getInstance().getVersionType() + "\n";
         debugInfo[1] += "Instance name: " + MinecraftClient.getInstance().getName() + "\n";
-        debugInfo[1] += "Game profile name: " + MinecraftClient.getInstance().getGameProfile().name() + "\n";
+        debugInfo[1] += "Game profile name: " + MinecraftClient.getInstance().getGameProfile().getName() + "\n";
         debugInfo[1] += "OS info:\n\t" + System.getProperty("os.name") + "\n\t" + System.getProperty("os.version") + "\n\t" + System.getProperty("os.arch") + "\n";
         debugInfo[1] += "CPU info: " + GLX._getCpuInfo() + "\n";
         Runtime runtime = Runtime.getRuntime();

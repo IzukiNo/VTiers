@@ -2,7 +2,6 @@ package com.vtiers.misc;
 
 import com.vtiers.textures.Icons;
 import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
@@ -75,7 +74,7 @@ public enum Mode {
             case SUBTIERS -> Icons.identifierSubtiers;
             case VNLIST -> Icons.identifierVNList;
         };
-        return Text.literal(unicode).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(identifier)).withColor(Colors.WHITE));
+        return Text.literal(unicode).setStyle(Style.EMPTY.withFont(identifier).withColor(Colors.WHITE));
     }
 
     public Text getIconTag() {
@@ -85,7 +84,7 @@ public enum Mode {
             case SUBTIERS -> Icons.identifierSubtiersTags;
             case VNLIST -> Icons.identifierVNListTags;
         };
-        return Text.literal(unicode).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(identifier)).withColor(Colors.WHITE));
+        return Text.literal(unicode).setStyle(Style.EMPTY.withFont(identifier).withColor(Colors.WHITE));
     }
 
     public Text getTextLabel() {

@@ -6,8 +6,9 @@ import com.vtiers.PlayerProfileQueue;
 import com.vtiers.VTiersClient;
 import com.vtiers.profile.PlayerProfile;
 import com.vtiers.screens.ConfigScreen;
+import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.resource.ResourceReloader;
+import net.minecraft.resource.ResourceManager;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 
@@ -22,15 +23,20 @@ import java.util.concurrent.Executor;
 
 import static com.vtiers.VTiersClient.LOGGER;
 
-public class ColorLoader implements ResourceReloader {
+public class ColorLoader implements IdentifiableResourceReloadListener {
     public static Identifier identifier = Identifier.of("minecraft", "colors/pvptiers.json");
 
     @Override
-    public CompletableFuture<Void> reload(Store store, Executor prepareExecutor, Synchronizer reloadSynchronizer, Executor applyExecutor) {
+    public Identifier getFabricId() {
+        return Identifier.of("vtiers", "color_loader");
+    }
+
+    @Override
+    public CompletableFuture<Void> reload(Synchronizer reloadSynchronizer, ResourceManager resourceManager, Executor prepareExecutor, Executor applyExecutor) {
         return CompletableFuture.supplyAsync(() -> {
-            if (store.getResourceManager().getResource(identifier).isPresent()) {
+            if (resourceManager.getResource(identifier).isPresent()) {
                 try {
-                    return JsonHelper.deserialize(new Gson(), new InputStreamReader(store.getResourceManager().getResource(identifier).get().getInputStream(), StandardCharsets.UTF_8), JsonObject.class);
+                    return JsonHelper.deserialize(new Gson(), new InputStreamReader(resourceManager.getResource(identifier).get().getInputStream(), StandardCharsets.UTF_8), JsonObject.class);
                 } catch (IOException ignored) {
                     LOGGER.warn("Error loading colors info");
                 }
@@ -47,7 +53,7 @@ public class ColorLoader implements ResourceReloader {
                 if (ConfigScreen.ownProfile == null) {
                     String ownName = null;
                     if (MinecraftClient.getInstance() != null && MinecraftClient.getInstance().getGameProfile() != null) {
-                        ownName = MinecraftClient.getInstance().getGameProfile().name();
+                        ownName = MinecraftClient.getInstance().getGameProfile().getName();
                     }
                     if (ownName != null && !ownName.isEmpty()) {
                         ConfigScreen.ownProfile = new PlayerProfile(ownName, false);

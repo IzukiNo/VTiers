@@ -18,7 +18,6 @@ import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.texture.NativeImage;
 import net.minecraft.client.texture.NativeImageBackedTexture;
 import net.minecraft.text.Style;
-import net.minecraft.text.StyleSpriteSource;
 import net.minecraft.text.Text;
 import net.minecraft.util.Colors;
 import net.minecraft.util.Identifier;
@@ -104,9 +103,9 @@ public class ConfigScreen extends Screen {
 
     private void drawIconShowcase(DrawContext context) {
         for (int i = 0; i < 8; i++) {
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal(String.valueOf((char) (0xF000 + i))).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "gamemodes/classic-medium")))), 34 + 14 * i, 13, Colors.WHITE);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal(String.valueOf((char) (0xF000 + i))).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "gamemodes/pvptiers-medium")))), 34 + 14 * i, 38, Colors.WHITE);
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal(String.valueOf((char) (0xF000 + i))).setStyle(Style.EMPTY.withFont(new StyleSpriteSource.Font(Identifier.of("minecraft", "gamemodes/mctiers-medium")))), 34 + 14 * i, 63, Colors.WHITE);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal(String.valueOf((char) (0xF000 + i))).setStyle(Style.EMPTY.withFont(Identifier.of("minecraft", "gamemodes/classic-medium"))), 34 + 14 * i, 13, Colors.WHITE);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal(String.valueOf((char) (0xF000 + i))).setStyle(Style.EMPTY.withFont(Identifier.of("minecraft", "gamemodes/pvptiers-medium"))), 34 + 14 * i, 38, Colors.WHITE);
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal(String.valueOf((char) (0xF000 + i))).setStyle(Style.EMPTY.withFont(Identifier.of("minecraft", "gamemodes/mctiers-medium"))), 34 + 14 * i, 63, Colors.WHITE);
         }
     }
 
@@ -200,7 +199,7 @@ public class ConfigScreen extends Screen {
             }).dimensions(width - 20 - 5 - 88 - 4, height - 20 - 5, 20, 20).tooltip(Tooltip.of(Text.of(useOwnProfile ? "Preview the default profile (" + defaultProfile.name + ")" : "Preview your player profile (" + ownProfile.name + ")"))).build();
         } else {
             enableOwnProfile = ButtonWidget.builder(Text.of("⚠"), (buttonWidget) -> {
-                ownProfile = new PlayerProfile(MinecraftClient.getInstance().getGameProfile().name(), false);
+                ownProfile = new PlayerProfile(MinecraftClient.getInstance().getGameProfile().getName(), false);
                 PlayerProfileQueue.putFirstInQueue(ownProfile);
 
                 close();

@@ -27,8 +27,8 @@ private static CompletableFuture<Suggestions> suggestPlayers(SuggestionsBuilder 
         suggestionsBuilder.suggest("-config", () -> "Open VTiers config screen");
 
     for (PlayerListEntry playerListEntry : minecraftClient.getNetworkHandler().getPlayerList())
-        if (CommandSource.shouldSuggest(suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT), playerListEntry.getProfile().name().toLowerCase(Locale.ROOT)) && playerListEntry.getProfile().name().length() > 2)
-            suggestionsBuilder.suggest(playerListEntry.getProfile().name(), () -> "Search tiers for " + playerListEntry.getProfile().name());
+        if (CommandSource.shouldSuggest(suggestionsBuilder.getRemaining().toLowerCase(Locale.ROOT), playerListEntry.getProfile().getName().toLowerCase(Locale.ROOT)) && playerListEntry.getProfile().getName().length() > 2)
+            suggestionsBuilder.suggest(playerListEntry.getProfile().getName(), () -> "Search tiers for " + playerListEntry.getProfile().getName());
 
     return suggestionsBuilder.buildFuture();
 }
