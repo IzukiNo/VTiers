@@ -21,25 +21,45 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.vtiers.VTiersClient.*;
 
 public class SuperProfile {
+    // Lookups of players the API has not cached yet take 1-2s server side
+    // (it has to ask Mojang), so the timeout must leave room for that.
+    private static final Duration REQUEST_TIMEOUT = Duration.ofSeconds(8);
+    private static final int MAX_ATTEMPTS = 4;
+    private static final long BASE_BACKOFF_MS = 750;
+    private static final long MAX_BACKOFF_MS = 8_000;
+    private static final long DEFAULT_RATE_LIMIT_MS = 5_000;
+    private static final long MAX_RATE_LIMIT_MS = 30_000;
+    // A lobby can hold 100+ players; firing all lookups at once overloads the API.
+    private static final int MAX_CONCURRENT_REQUESTS = 6;
+    // "Down" = at least this many failures in the last minute AND they are >= half of all answers.
+    private static final int DOWN_MIN_FAILURES = 5;
+    private static final long DOWN_MESSAGE_COOLDOWN_MS = 10 * 60 * 1000;
+
     private static final ScheduledExecutorService updateAndRecoverFailedRequestsScheduler = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "vtiers-superprofile-scheduler");
         t.setDaemon(true);
         return t;
     });
+    private static final ConcurrentLinkedQueue<Runnable> pendingRequests = new ConcurrentLinkedQueue<>();
+    private static final AtomicInteger activeRequests = new AtomicInteger(0);
+
     public static final CopyOnWriteArrayList<SuperProfile> failedSuperProfiles = new CopyOnWriteArrayList<>();
     public static final AtomicInteger PvPTiersRequests = new AtomicInteger(0);
     public static final AtomicInteger failedPvPTiersRequests = new AtomicInteger(0);
     public static final AtomicInteger failedPvPTiersRequestsLastMinute = new AtomicInteger(0);
-    public static boolean isPvPTiersDown = false;
+    public static final AtomicInteger succeededPvPTiersRequestsLastMinute = new AtomicInteger(0);
+    public static volatile boolean isPvPTiersDown = false;
 
     public static final AtomicInteger VNListRequests = new AtomicInteger(0);
     public static final AtomicInteger failedVNListRequests = new AtomicInteger(0);
     public static final AtomicInteger failedVNListRequestsLastMinute = new AtomicInteger(0);
-    public static boolean isVNListDown = false;
+    public static final AtomicInteger succeededVNListRequestsLastMinute = new AtomicInteger(0);
+    public static volatile boolean isVNListDown = false;
 
     public static int numberOfMessages;
+    private static long lastDownMessageAt;
 
-    public Status status = Status.SEARCHING;
+    public volatile Status status = Status.SEARCHING;
     private int numberOfRequests;
 
     private String region;
@@ -74,14 +94,42 @@ public class SuperProfile {
         updateAndRecoverFailedRequestsScheduler.scheduleAtFixedRate(SuperProfile::updateDownStatus, 0, 1, TimeUnit.SECONDS);
     }
 
+    private static boolean looksDown(AtomicInteger failed, AtomicInteger succeeded) {
+        int failures = failed.get();
+        return failures >= DOWN_MIN_FAILURES && failures >= succeeded.get();
+    }
+
     private static void updateDownStatus() {
-        isPvPTiersDown = failedPvPTiersRequestsLastMinute.get() > 3;
-        isVNListDown = failedVNListRequestsLastMinute.get() > 3;
+        boolean wasPvPTiersDown = isPvPTiersDown;
+        boolean wasVNListDown = isVNListDown;
+        isPvPTiersDown = looksDown(failedPvPTiersRequestsLastMinute, succeededPvPTiersRequestsLastMinute);
+        isVNListDown = looksDown(failedVNListRequestsLastMinute, succeededVNListRequestsLastMinute);
+
+        if (isPvPTiersDown && !wasPvPTiersDown)
+            notifyDown("PvPTiers");
+        if (isVNListDown && !wasVNListDown)
+            notifyDown("VNList");
+    }
+
+    // Warn once when an API goes down, not every N failed lookups.
+    private static synchronized void notifyDown(String source) {
+        String message = "[VTiers] " + source + " is not responding right now. Failed lookups will be retried automatically. Use '/vtiers -status' for more info";
+        LOGGER.warn(message);
+
+        long now = System.currentTimeMillis();
+        if (now - lastDownMessageAt < DOWN_MESSAGE_COOLDOWN_MS || numberOfMessages >= 5)
+            return;
+
+        lastDownMessageAt = now;
+        numberOfMessages++;
+        sendMessageToPlayer(Icons.colorText(message, Colors.YELLOW), false);
     }
 
     private static void updateAndRecoverFailedRequests() {
         failedPvPTiersRequestsLastMinute.set(0);
         failedVNListRequestsLastMinute.set(0);
+        succeededPvPTiersRequestsLastMinute.set(0);
+        succeededVNListRequestsLastMinute.set(0);
 
         for (SuperProfile superProfile : SuperProfile.failedSuperProfiles) {
 
@@ -122,7 +170,7 @@ public class SuperProfile {
         this.apiUrl = apiUrl;
         this.uuid = uuid;
 
-        if (numberOfRequests >= 5 || (status != Status.SEARCHING && status != Status.RATE_LIMITED)) {
+        if (numberOfRequests >= MAX_ATTEMPTS || (status != Status.SEARCHING && status != Status.RATE_LIMITED)) {
             status = Status.TIMEOUTED;
             failedRequest();
             return;
@@ -131,41 +179,156 @@ public class SuperProfile {
 
         numberOfRequests++;
 
-        HttpRequest httpRequest = HttpRequest.newBuilder()
-                .uri(URI.create(apiUrl + uuid + extra))
-                .header("User-Agent", userAgent)
-                .timeout(Duration.ofSeconds(3))
-                .GET()
-                .build();
+        final HttpRequest httpRequest;
+        try {
+            httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(apiUrl + uuid + extra))
+                    .header("User-Agent", userAgent)
+                    .header("Accept", "application/json")
+                    .timeout(REQUEST_TIMEOUT)
+                    .GET()
+                    .build();
+        } catch (IllegalArgumentException invalidUri) {
+            status = Status.API_ISSUE;
+            LOGGER.warn("Tiers | Invalid request URL ({}): {}", apiUrl + uuid + extra, invalidUri.getMessage());
+            return;
+        }
 
-        httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString()).thenAccept(response -> {
-            int statusCode = response.statusCode();
-            if (statusCode == 404) {
-                status = Status.NOT_EXISTING;
-                return;
-            } else if (statusCode == 429) {
-                status = Status.RATE_LIMITED;
-                CompletableFuture.delayedExecutor(5, TimeUnit.SECONDS).execute(() -> {
-                    status = Status.SEARCHING;
-                    buildRequest(apiUrl, uuid, extra);
-                });
-                return;
-            } else if (statusCode == 502 || statusCode == 525) {
-                numberOfRequests++;
-                CompletableFuture.delayedExecutor(2, TimeUnit.SECONDS).execute(() -> buildRequest(apiUrl, uuid, extra));
-                return;
-            } else if (statusCode != 200) {
-                status = Status.API_ISSUE;
-                failedRequest();
-                LOGGER.info("Tiers | Request failed ({}) | Code: {} | Body: {}", apiUrl + uuid + extra, statusCode, response.body());
+        runLimited(() -> {
+            CompletableFuture<HttpResponse<String>> future;
+            try {
+                future = httpClient.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofString());
+            } catch (RuntimeException sendError) {
+                releaseSlot();
+                handleNetworkError(sendError, apiUrl, uuid, extra);
                 return;
             }
 
-            parseJson(response.body());
-        }).exceptionally(ignored -> {
-            CompletableFuture.delayedExecutor(100, TimeUnit.MILLISECONDS).execute(() -> buildRequest(apiUrl, uuid, extra));
-            return null;
+            future.whenComplete((response, error) -> {
+                releaseSlot();
+                try {
+                    if (error != null)
+                        handleNetworkError(error, apiUrl, uuid, extra);
+                    else
+                        handleResponse(response, apiUrl, uuid, extra);
+                } catch (RuntimeException unexpected) {
+                    LOGGER.warn("Tiers | Error while handling response ({}): {}", apiUrl + uuid + extra, unexpected.toString());
+                    retryLater(backoffDelay(), apiUrl, uuid, extra);
+                }
+            });
         });
+    }
+
+    private void handleResponse(HttpResponse<String> response, String apiUrl, String uuid, String extra) {
+        int statusCode = response.statusCode();
+
+        if (statusCode == 200) {
+            try {
+                parseJson(response.body());
+            } catch (RuntimeException badJson) {
+                // e.g. a proxy error page served with 200: treat like a transient error.
+                LOGGER.warn("Tiers | Unreadable response ({}): {}", apiUrl + uuid + extra, badJson.toString());
+                retryLater(backoffDelay(), apiUrl, uuid, extra);
+                return;
+            }
+            recordSuccess();
+            return;
+        }
+
+        if (statusCode == 404) {
+            status = Status.NOT_EXISTING;
+            recordSuccess();
+            return;
+        }
+
+        if (statusCode == 429) {
+            status = Status.RATE_LIMITED;
+            retryLater(retryAfterDelay(response), apiUrl, uuid, extra);
+            return;
+        }
+
+        // 5xx and Cloudflare 52x (origin timeout/unreachable) are usually transient.
+        if (statusCode == 408 || statusCode >= 500) {
+            retryLater(backoffDelay(), apiUrl, uuid, extra);
+            return;
+        }
+
+        status = Status.API_ISSUE;
+        failedRequest();
+        LOGGER.info("Tiers | Request failed ({}) | Code: {} | Body: {}", apiUrl + uuid + extra, statusCode, response.body());
+    }
+
+    private void handleNetworkError(Throwable error, String apiUrl, String uuid, String extra) {
+        Throwable cause = error instanceof CompletionException && error.getCause() != null ? error.getCause() : error;
+        LOGGER.debug("Tiers | Request error ({}), attempt {}/{}: {}", apiUrl + uuid + extra, numberOfRequests, MAX_ATTEMPTS, cause.toString());
+        retryLater(backoffDelay(), apiUrl, uuid, extra);
+    }
+
+    private void retryLater(long delayMs, String apiUrl, String uuid, String extra) {
+        if (numberOfRequests >= MAX_ATTEMPTS) {
+            // No point waiting just to give up: fail now, the recovery task retries later.
+            status = Status.TIMEOUTED;
+            failedRequest();
+            return;
+        }
+        CompletableFuture.delayedExecutor(delayMs, TimeUnit.MILLISECONDS).execute(() -> buildRequest(apiUrl, uuid, extra));
+    }
+
+    // Exponential backoff with jitter: ~0.75s, 1.5s, 3s...
+    private long backoffDelay() {
+        long exponential = BASE_BACKOFF_MS << Math.max(0, numberOfRequests - 1);
+        long jitter = ThreadLocalRandom.current().nextLong(BASE_BACKOFF_MS / 2 + 1);
+        return Math.min(MAX_BACKOFF_MS, exponential) + jitter;
+    }
+
+    private static long retryAfterDelay(HttpResponse<?> response) {
+        String retryAfter = response.headers().firstValue("Retry-After")
+                .or(() -> response.headers().firstValue("RateLimit-Reset"))
+                .orElse(null);
+        if (retryAfter != null) {
+            try {
+                long seconds = Long.parseLong(retryAfter.trim());
+                if (seconds > 0)
+                    return Math.min(seconds * 1000, MAX_RATE_LIMIT_MS) + ThreadLocalRandom.current().nextLong(500);
+            } catch (NumberFormatException ignored) {
+                // HTTP-date form is not used by the APIs we call
+            }
+        }
+        return DEFAULT_RATE_LIMIT_MS + ThreadLocalRandom.current().nextLong(1000);
+    }
+
+    private static void runLimited(Runnable task) {
+        pendingRequests.add(task);
+        drainPendingRequests();
+    }
+
+    private static void releaseSlot() {
+        activeRequests.decrementAndGet();
+        drainPendingRequests();
+    }
+
+    private static void drainPendingRequests() {
+        while (!pendingRequests.isEmpty()) {
+            int active = activeRequests.get();
+            if (active >= MAX_CONCURRENT_REQUESTS)
+                return;
+            if (!activeRequests.compareAndSet(active, active + 1))
+                continue;
+
+            Runnable task = pendingRequests.poll();
+            if (task == null) {
+                activeRequests.decrementAndGet();
+                continue;
+            }
+            task.run();
+        }
+    }
+
+    private void recordSuccess() {
+        if (this instanceof PvPTiersProfile)
+            succeededPvPTiersRequestsLastMinute.incrementAndGet();
+        else if (this instanceof VNListProfile)
+            succeededVNListRequestsLastMinute.incrementAndGet();
     }
 
     public void parseJson(String json) {
@@ -338,30 +501,16 @@ public class SuperProfile {
     }
 
     private void failedRequest() {
-        String message = null;
-        synchronized (SuperProfile.class) {
-            if (this instanceof PvPTiersProfile) {
-                failedPvPTiersRequestsLastMinute.incrementAndGet();
-                if (failedPvPTiersRequests.incrementAndGet() % 20 == 0)
-                    message = "[VTiers] PvPTiers might be down. " + failedPvPTiersRequests + " searches (out of " + PvPTiersRequests + ") failed so far. Use '/vtiers -status' for more info";
-            } else if (this instanceof VNListProfile) {
-                failedVNListRequestsLastMinute.incrementAndGet();
-                if (failedVNListRequests.incrementAndGet() % 20 == 0)
-                    message = "[VTiers] VNList might be down. " + failedVNListRequests + " searches (out of " + VNListRequests + ") failed so far. Use '/vtiers -status' for more info";
-            }
+        if (this instanceof PvPTiersProfile) {
+            failedPvPTiersRequestsLastMinute.incrementAndGet();
+            failedPvPTiersRequests.incrementAndGet();
+        } else if (this instanceof VNListProfile) {
+            failedVNListRequestsLastMinute.incrementAndGet();
+            failedVNListRequests.incrementAndGet();
         }
 
-        failedSuperProfiles.add(this);
-
-        if (message != null) {
-            VTiersClient.LOGGER.info(message);
-            if (numberOfMessages < 5) {
-                Text textMessage = Icons.colorText(message, Colors.YELLOW);
-
-                sendMessageToPlayer(textMessage, false);
-                numberOfMessages++;
-            }
-        }
+        // The chat warning is decided by updateDownStatus() from the failure rate.
+        failedSuperProfiles.addIfAbsent(this);
     }
 
     public String[] checkOutages() {

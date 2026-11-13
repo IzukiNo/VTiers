@@ -56,7 +56,10 @@ public class VTiersClient implements ClientModInitializer {
     public static String userAgent = "VTiers (modrinth.com/mod/vtiers)";
     public static final CopyOnWriteArrayList<PlayerProfile> playerProfiles = new CopyOnWriteArrayList<>();
     public static final HashMap<String, PlayerProfile> readyPlayerProfiles = new HashMap<>();
-    public static final HttpClient httpClient = HttpClient.newHttpClient();
+    public static final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(java.time.Duration.ofSeconds(5))
+            .followRedirects(HttpClient.Redirect.NORMAL)
+            .build();
     public static int cacheVersion;
     public static volatile boolean cachesDirty = false;
 
