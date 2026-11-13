@@ -9,6 +9,7 @@ import com.vtiers.screens.ConfigScreen;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.resource.ResourceManager;
+import net.minecraft.util.profiler.Profiler;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.JsonHelper;
 
@@ -32,7 +33,7 @@ public class ColorLoader implements IdentifiableResourceReloadListener {
     }
 
     @Override
-    public CompletableFuture<Void> reload(Synchronizer reloadSynchronizer, ResourceManager resourceManager, Executor prepareExecutor, Executor applyExecutor) {
+    public CompletableFuture<Void> reload(Synchronizer reloadSynchronizer, ResourceManager resourceManager, Profiler prepareProfiler, Profiler applyProfiler, Executor prepareExecutor, Executor applyExecutor) {
         return CompletableFuture.supplyAsync(() -> {
             if (resourceManager.getResource(identifier).isPresent()) {
                 try {

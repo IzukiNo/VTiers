@@ -10,7 +10,6 @@ import com.vtiers.textures.ColorControl;
 import com.vtiers.textures.Icons;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -99,7 +98,7 @@ public class PlayerSearchResultScreen extends Screen {
             return;
         }
 
-        context.drawTexture(RenderLayer::getGuiTextured, image, x - 12, (int) (y + 2.4 * separator) + 4 - 38, 0, 0, 24, 24, 24, 24);
+        context.drawTexture(image, x - 12, (int) (y + 2.4 * separator) + 4 - 38, 0, 0, 24, 24, 24, 24);
 
         if (superProfile.status == Status.SEARCHING) {
             context.drawCenteredTextWithShadow(textRenderer, "Searching...", x, (int) (y + 2.8 * separator), ColorControl.getColorMinecraftStandard("green"));
@@ -234,9 +233,9 @@ public class PlayerSearchResultScreen extends Screen {
     private void drawPlayerAvatar(DrawContext context, int x, int y) {
         if (imageReady) {
             if (playerProfile.imageSaved == 1 || playerProfile.imageSaved == 2)
-                context.drawTexture(RenderLayer::getGuiTextured, playerAvatarTexture, x - width / 32, y, 0, 0, width / 16, (int) (width / 6.666), width / 16, (int) (width / 6.666));
+                context.drawTexture(playerAvatarTexture, x - width / 32, y, 0, 0, width / 16, (int) (width / 6.666), width / 16, (int) (width / 6.666));
             else if (playerProfile.imageSaved < 6 && playerProfile.imageSaved > 2)
-                context.drawTexture(RenderLayer::getGuiTextured, playerAvatarTexture, (int) (x - width / 22.5), y, 0, 0, (int) (width / 11.25), (int) (width / 6.666), (int) (width / 11.25), (int) (width / 6.666));
+                context.drawTexture(playerAvatarTexture, (int) (x - width / 22.5), y, 0, 0, (int) (width / 11.25), (int) (width / 6.666), (int) (width / 11.25), (int) (width / 6.666));
         } else if (playerProfile.imageSaved != 0) {
             loadPlayerAvatar();
         } else if (playerProfile.numberOfImageRequests >= 6)

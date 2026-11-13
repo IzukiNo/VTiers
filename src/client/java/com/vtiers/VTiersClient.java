@@ -358,7 +358,8 @@ public class VTiersClient implements ClientModInitializer {
     }
 
     public static void setScreen(Screen screen) {
-        MinecraftClient.getInstance().executeAsync(ignored -> MinecraftClient.getInstance().setScreen(screen));
+        // Queue for the next tick so the chat screen closing after a command does not replace it
+        MinecraftClient.getInstance().send(() -> MinecraftClient.getInstance().setScreen(screen));
     }
 
     public static String[] getDebugInfo() {
@@ -451,7 +452,7 @@ public class VTiersClient implements ClientModInitializer {
 
         for (Entity entity : minecraftClient.world.getEntities())
             if (entity instanceof DisplayEntity.TextDisplayEntity textDisplay)
-                ((DataTrackerAccessor) textDisplay.getDataTracker()).invokeSet(TextDisplayAccessor.getTEXT(), textDisplay.getText(), true);
+                ((DataTrackerAccessor) textDisplay.getDataTracker()).invokeSet(TextDisplayAccessor.getTEXT(), textDisplay.getDataTracker().get(TextDisplayAccessor.getTEXT()), true);
     }
 
     public static Text cyclePvPTiersMode() {
