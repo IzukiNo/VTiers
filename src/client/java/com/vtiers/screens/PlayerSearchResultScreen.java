@@ -10,7 +10,7 @@ import com.vtiers.textures.ColorControl;
 import com.vtiers.textures.Icons;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.ConfirmLinkScreen;
 import net.minecraft.client.gui.screen.Screen;
@@ -99,7 +99,7 @@ public class PlayerSearchResultScreen extends Screen {
             return;
         }
 
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, image, x - 12, (int) (y + 2.4 * separator) + 4 - 38, 0, 0, 24, 24, 24, 24);
+        context.drawTexture(RenderLayer::getGuiTextured, image, x - 12, (int) (y + 2.4 * separator) + 4 - 38, 0, 0, 24, 24, 24, 24);
 
         if (superProfile.status == Status.SEARCHING) {
             context.drawCenteredTextWithShadow(textRenderer, "Searching...", x, (int) (y + 2.8 * separator), ColorControl.getColorMinecraftStandard("green"));
@@ -112,7 +112,7 @@ public class PlayerSearchResultScreen extends Screen {
             renderFailedRequestMessage(context, superProfile, x, y);
             return;
         } else if (superProfile.status == Status.API_ISSUE) {
-            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Search failed: API issue").setStyle(Style.EMPTY.withHoverEvent(new HoverEvent.ShowText(Text.of("hello")))), x, (int) (y + 2.8 * separator), ColorControl.getColorMinecraftStandard("red"));
+            context.drawCenteredTextWithShadow(textRenderer, Text.literal("Search failed: API issue").setStyle(Style.EMPTY.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.of("hello")))), x, (int) (y + 2.8 * separator), ColorControl.getColorMinecraftStandard("red"));
             renderFailedRequestMessage(context, superProfile, x, y);
 
             context.drawCenteredTextWithShadow(textRenderer, "Update Tiers or retry in a while", x, (int) (y + 2.8 * separator + 50), Colors.YELLOW);
@@ -234,9 +234,9 @@ public class PlayerSearchResultScreen extends Screen {
     private void drawPlayerAvatar(DrawContext context, int x, int y) {
         if (imageReady) {
             if (playerProfile.imageSaved == 1 || playerProfile.imageSaved == 2)
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, playerAvatarTexture, x - width / 32, y, 0, 0, width / 16, (int) (width / 6.666), width / 16, (int) (width / 6.666));
+                context.drawTexture(RenderLayer::getGuiTextured, playerAvatarTexture, x - width / 32, y, 0, 0, width / 16, (int) (width / 6.666), width / 16, (int) (width / 6.666));
             else if (playerProfile.imageSaved < 6 && playerProfile.imageSaved > 2)
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, playerAvatarTexture, (int) (x - width / 22.5), y, 0, 0, (int) (width / 11.25), (int) (width / 6.666), (int) (width / 11.25), (int) (width / 6.666));
+                context.drawTexture(RenderLayer::getGuiTextured, playerAvatarTexture, (int) (x - width / 22.5), y, 0, 0, (int) (width / 11.25), (int) (width / 6.666), (int) (width / 11.25), (int) (width / 6.666));
         } else if (playerProfile.imageSaved != 0) {
             loadPlayerAvatar();
         } else if (playerProfile.numberOfImageRequests >= 6)
@@ -248,7 +248,7 @@ public class PlayerSearchResultScreen extends Screen {
             return;
 
         try (FileInputStream fileInputStream = new FileInputStream(FabricLoader.getInstance().getGameDir().resolve("cache/vtiers/players/" + playerProfile.uuid + ".png").toFile())) {
-            MinecraftClient.getInstance().getTextureManager().registerTexture(playerAvatarTexture, new NativeImageBackedTexture(null, NativeImage.read(fileInputStream)));
+            MinecraftClient.getInstance().getTextureManager().registerTexture(playerAvatarTexture, new NativeImageBackedTexture(NativeImage.read(fileInputStream)));
             imageReady = true;
         } catch (IOException ignored) {
             LOGGER.warn("Error loading player skin");

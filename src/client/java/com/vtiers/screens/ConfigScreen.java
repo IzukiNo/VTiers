@@ -10,7 +10,7 @@ import com.vtiers.textures.ColorControl;
 import com.vtiers.textures.Icons;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gl.RenderPipelines;
+import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
@@ -87,13 +87,13 @@ public class ConfigScreen extends Screen {
         drawIconShowcase(context);
 
         if (!useOwnProfile)
-            context.drawTexture(RenderPipelines.GUI_TEXTURED, playerAvatarTexture, centerX - height / 10 / 2, height - (int) (height / 4.166) - height / 54, 0, 0, height / 10, (int) (height / 4.166), height / 10, (int) (height / 4.166));
+            context.drawTexture(RenderLayer::getGuiTextured, playerAvatarTexture, centerX - height / 10 / 2, height - (int) (height / 4.166) - height / 54, 0, 0, height / 10, (int) (height / 4.166), height / 10, (int) (height / 4.166));
         else
             drawPlayerAvatar(context, centerX, height - (int) (height / 4.166) - height / 54);
 
         context.drawCenteredTextWithShadow(textRenderer, useOwnProfile ? ownProfile.getFullName() : defaultProfile.getFullName(), centerX, height - (int) (height / 4.166) - height / 54 - 12, Colors.WHITE);
 
-        context.drawTexture(RenderPipelines.GUI_TEXTURED, VNListProfile.VNLIST_IMAGE, centerX - 12, distance + 110 + 4, 0, 0, 24, 24, 24, 24);
+        context.drawTexture(RenderLayer::getGuiTextured, VNListProfile.VNLIST_IMAGE, centerX - 12, distance + 110 + 4, 0, 0, 24, 24, 24, 24);
 
         context.drawTextWithShadow(textRenderer, VTiersClient.getRightIcon(), centerX + 90 + 32, distance + 75 + 9, Colors.WHITE);
         context.drawTextWithShadow(textRenderer, VTiersClient.getLeftIcon(), centerX - 90 - 32 - 12, distance + 75 + 9, Colors.WHITE);
@@ -313,9 +313,9 @@ public class ConfigScreen extends Screen {
     private void drawPlayerAvatar(DrawContext context, int x, int y) {
         if (imageReady) {
             if (ownProfile.imageSaved == 1 || ownProfile.imageSaved == 2)
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, playerAvatarTexture, x - height / 10 / 2, y, 0, 0, height / 10, (int) (height / 4.166), height / 10, (int) (height / 4.166));
+                context.drawTexture(RenderLayer::getGuiTextured, playerAvatarTexture, x - height / 10 / 2, y, 0, 0, height / 10, (int) (height / 4.166), height / 10, (int) (height / 4.166));
             else if (ownProfile.imageSaved < 6 && ownProfile.imageSaved > 2)
-                context.drawTexture(RenderPipelines.GUI_TEXTURED, playerAvatarTexture, x - height / 7 / 2, y, 0, 0, height / 7, (int) (height / 4.145), height / 7, (int) (height / 4.145));
+                context.drawTexture(RenderLayer::getGuiTextured, playerAvatarTexture, x - height / 7 / 2, y, 0, 0, height / 7, (int) (height / 4.145), height / 7, (int) (height / 4.145));
         } else if (ownProfile.imageSaved != 0) {
             loadPlayerAvatar();
         } else if (ownProfile.numberOfImageRequests >= 6)
@@ -327,7 +327,7 @@ public class ConfigScreen extends Screen {
             return;
 
         try (FileInputStream fileInputStream = new FileInputStream(FabricLoader.getInstance().getGameDir().resolve("cache/vtiers/" + (useOwnProfile ? ownProfile.uuid : defaultProfile.uuid) + ".png").toFile())) {
-            MinecraftClient.getInstance().getTextureManager().registerTexture(playerAvatarTexture, new NativeImageBackedTexture(null, NativeImage.read(fileInputStream)));
+            MinecraftClient.getInstance().getTextureManager().registerTexture(playerAvatarTexture, new NativeImageBackedTexture(NativeImage.read(fileInputStream)));
             imageReady = true;
         } catch (IOException ignored) {
             LOGGER.warn("Error loading player skin");

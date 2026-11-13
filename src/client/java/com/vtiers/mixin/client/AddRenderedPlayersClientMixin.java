@@ -3,6 +3,7 @@ package com.vtiers.mixin.client;
 import com.mojang.authlib.GameProfile;
 import com.vtiers.VTiersClient;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,7 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(PlayerEntity.class)
 public abstract class AddRenderedPlayersClientMixin {
     @Inject(at = @At(value = "TAIL"), method = "<init>")
-    private void onConstruct(World world, GameProfile profile, CallbackInfo ci) {
+    private void onConstruct(World world, BlockPos pos, float yaw, GameProfile profile, CallbackInfo ci) {
         if (VTiersClient.toggleMod)
             VTiersClient.addGetPlayer(profile.getName(), false);
     }

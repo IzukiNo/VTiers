@@ -1,7 +1,7 @@
 package com.vtiers;
 
 import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.platform.GlDebugInfo;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.context.CommandContext;
 import com.vtiers.misc.CommandRegister;
@@ -45,7 +45,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.URI;
 import java.net.http.HttpClient;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -178,7 +177,7 @@ public class VTiersClient implements ClientModInitializer {
 
         PlayerEntity playerEntity = self.getWorld().getPlayers().stream()
                 .filter(player -> player != self)
-                .filter(player -> self.distanceTo(player) < MinecraftClient.getInstance().gameRenderer.getViewDistanceBlocks())
+                .filter(player -> self.distanceTo(player) < MinecraftClient.getInstance().gameRenderer.getViewDistance())
                 .min(Comparator.comparingDouble(self::distanceTo))
                 .orElse(null);
 
@@ -300,11 +299,11 @@ public class VTiersClient implements ClientModInitializer {
         else if (playerName.equalsIgnoreCase("-help") || playerName.equalsIgnoreCase("-debug")) {
             sendMessageToPlayer(Icons.colorText("", Colors.WHITE), false);
             sendMessageToPlayer(Icons.colorText("--- VTiers help ---", Colors.YELLOW), false);
-            sendMessageToPlayer(Text.literal("- General contact: ").append(Text.literal("izukinoo on Discord").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://discordapp.com/users/854356889320423424"))))), false);
-            sendMessageToPlayer(Text.literal("- Report a bug: ").append(Text.literal("VTiers GitHub issues").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/IzukiNo/VTiers/issues"))))), false);
+            sendMessageToPlayer(Text.literal("- General contact: ").append(Text.literal("izukinoo on Discord").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://discordapp.com/users/854356889320423424")))), false);
+            sendMessageToPlayer(Text.literal("- Report a bug: ").append(Text.literal("VTiers GitHub issues").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/IzukiNo/VTiers/issues")))), false);
             sendMessageToPlayer(Text.literal("- It's not advisable to create tickets in VNList support"), false);
-            sendMessageToPlayer(Text.literal("- ").append(Text.literal("Changelogs").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://github.com/IzukiNo/VTiers/wiki/Version-changelogs"))))), false);
-            sendMessageToPlayer(Text.literal("- ").append(Text.literal("Modrinth page").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent.OpenUrl(URI.create("https://modrinth.com/mod/vtiers"))))), false);
+            sendMessageToPlayer(Text.literal("- ").append(Text.literal("Changelogs").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://github.com/IzukiNo/VTiers/wiki/Version-changelogs")))), false);
+            sendMessageToPlayer(Text.literal("- ").append(Text.literal("Modrinth page").styled(style -> style.withUnderline(true).withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, "https://modrinth.com/mod/vtiers")))), false);
 
             String[] debugInfo = getDebugInfo();
             sendMessageToPlayer(Icons.colorText("\n" + debugInfo[0], Colors.LIGHT_YELLOW), false);
@@ -385,8 +384,7 @@ public class VTiersClient implements ClientModInitializer {
         debugInfo[1] += "CPU info: " + GLX._getCpuInfo() + "\n";
         Runtime runtime = Runtime.getRuntime();
         debugInfo[1] += "RAM info (MB):\n\tMax: " + runtime.maxMemory() / (1024 * 1024) + "\n\tTotal: " + runtime.totalMemory() / (1024 * 1024) + "\n\tFree: " + runtime.freeMemory() / (1024 * 1024) + "\n\tIn use: " + (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024) + "\n";
-        GpuDevice gpuDevice = RenderSystem.getDevice();
-        debugInfo[1] += "GPU info:\n\t" + gpuDevice.getBackendName() + "\n\t" + gpuDevice.getImplementationInformation() + "\n\t" + gpuDevice.getRenderer() + "\n\t" + gpuDevice.getVersion() + "\n";
+        debugInfo[1] += "GPU info:\n\t" + RenderSystem.getBackendDescription() + "\n\t" + GlDebugInfo.getVendor() + "\n\t" + GlDebugInfo.getRenderer() + "\n\t" + GlDebugInfo.getVersion() + "\n";
         debugInfo[1] += "Java version: " + System.getProperty("java.version") + "\n";
         debugInfo[1] += "Launch args: " + Arrays.toString(FabricLoader.getInstance().getLaunchArguments(true)) + "\n";
         debugInfo[1] += "All Fabric mods: " + FabricLoader.getInstance().getAllMods() + "\n";
