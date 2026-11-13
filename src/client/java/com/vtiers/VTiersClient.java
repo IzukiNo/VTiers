@@ -1,7 +1,7 @@
 package com.vtiers;
 
-import com.mojang.blaze3d.platform.GLX;
-import com.mojang.blaze3d.systems.GpuDevice;
+import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.renderpearl.api.device.GpuDevice;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.brigadier.context.CommandContext;
 import com.vtiers.misc.CommandRegister;
@@ -38,7 +38,6 @@ import net.minecraft.world.entity.Display;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import org.apache.commons.io.FileUtils;
-import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,10 +94,10 @@ public class VTiersClient implements ClientModInitializer {
         });
 
         KeyMapping.Category category = KeyMapping.Category.register(Identifier.fromNamespaceAndPath("vtiers", "category"));
-        autoDetectKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vtiers.auto_detect_kit", GLFW.GLFW_KEY_Y, category));
-        openClosestPlayerProfile = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vtiers.open_closest_player_profile", GLFW.GLFW_KEY_H, category));
-        cycleRightKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vtiers.cycle_right_gamemodes", GLFW.GLFW_KEY_I, category));
-        cycleLeftKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vtiers.cycle_left_gamemodes", GLFW.GLFW_KEY_U, category));
+        autoDetectKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vtiers.auto_detect_kit", InputConstants.KEY_Y, category));
+        openClosestPlayerProfile = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vtiers.open_closest_player_profile", InputConstants.KEY_H, category));
+        cycleRightKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vtiers.cycle_right_gamemodes", InputConstants.KEY_I, category));
+        cycleLeftKey = KeyMappingHelper.registerKeyMapping(new KeyMapping("key.vtiers.cycle_left_gamemodes", InputConstants.KEY_U, category));
 
         ResourceLoader.get(PackType.CLIENT_RESOURCES).registerReloadListener(Identifier.fromNamespaceAndPath("vtiers", "color_loader"), new ColorLoader());
         ClientTickEvents.END_CLIENT_TICK.register(VTiersClient::checkKeys);
@@ -386,7 +385,7 @@ public class VTiersClient implements ClientModInitializer {
         debugInfo[1] += "Instance name: " + Minecraft.getInstance().name() + "\n";
         debugInfo[1] += "Game profile name: " + Minecraft.getInstance().getGameProfile().name() + "\n";
         debugInfo[1] += "OS info:\n\t" + System.getProperty("os.name") + "\n\t" + System.getProperty("os.version") + "\n\t" + System.getProperty("os.arch") + "\n";
-        debugInfo[1] += "CPU info: " + GLX._getCpuInfo() + "\n";
+        debugInfo[1] += "CPU cores: " + Runtime.getRuntime().availableProcessors() + "\n";
         Runtime runtime = Runtime.getRuntime();
         debugInfo[1] += "RAM info (MB):\n\tMax: " + runtime.maxMemory() / (1024 * 1024) + "\n\tTotal: " + runtime.totalMemory() / (1024 * 1024) + "\n\tFree: " + runtime.freeMemory() / (1024 * 1024) + "\n\tIn use: " + (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024) + "\n";
         GpuDevice gpuDevice = RenderSystem.getDevice();

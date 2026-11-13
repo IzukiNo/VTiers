@@ -24,10 +24,10 @@ import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.CommonColors;
-import net.minecraft.util.Util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 
 import static com.vtiers.VTiersClient.LOGGER;
 
@@ -118,14 +118,8 @@ public class PlayerSearchResultScreen extends Screen {
 
             context.centeredText(font, "Update Tiers or retry in a while", x, (int) (y + 2.8 * separator + 50), CommonColors.YELLOW);
             if (!superProfile.apiErrorShown) {
-                addRenderableWidget(Button.builder(Component.literal("Report issue"), (buttonWidget) -> {
-                    Minecraft client = Minecraft.getInstance();
-                    client.gui.setScreen(new ConfirmLinkScreen((confirmed) -> {
-                        if (confirmed)
-                            Util.getPlatform().openUri("https://github.com/IzukiNo/VTiers/issues");
-                        client.gui.setScreen(this);
-                    }, "https://github.com/IzukiNo/VTiers/issues", true));
-                }).bounds(x - 40, (int) (y + 2.8 * separator + 50 + 12), 80, 20).tooltip(Tooltip.create(Component.nullToEmpty("Report this issue on GitHub. Make sure to report only if the same search on vnlist.asia doesn't fail"))).build());
+                addRenderableWidget(Button.builder(Component.literal("Report issue"), (buttonWidget) ->
+                        ConfirmLinkScreen.confirmLinkNow(this, URI.create("https://github.com/IzukiNo/VTiers/issues"), true)).bounds(x - 40, (int) (y + 2.8 * separator + 50 + 12), 80, 20).tooltip(Tooltip.create(Component.nullToEmpty("Report this issue on GitHub. Make sure to report only if the same search on vnlist.asia doesn't fail"))).build());
                 superProfile.apiErrorShown = true;
             }
             return;
@@ -271,14 +265,8 @@ public class PlayerSearchResultScreen extends Screen {
 
         addRenderableWidget(dimensionsWarning);
 
-        addRenderableWidget(Button.builder(Icons.NAMEMC, (ignored) -> {
-            Minecraft minecraftClient = Minecraft.getInstance();
-            minecraftClient.gui.setScreen(new ConfirmLinkScreen((confirmed) -> {
-                if (confirmed)
-                    Util.getPlatform().openUri("https://namemc.com/profile/" + playerProfile.uuid);
-                minecraftClient.gui.setScreen(this);
-            }, "https://namemc.com/profile/" + playerProfile.uuid, true));
-        }).bounds(width - 20 - 5, height - 20 - 5, 20, 20).tooltip(Tooltip.create(Component.literal("Open " + playerProfile.targetName + "'s NameMC page"))).build());
+        addRenderableWidget(Button.builder(Icons.NAMEMC, (ignored) ->
+                ConfirmLinkScreen.confirmLinkNow(this, URI.create("https://namemc.com/profile/" + playerProfile.uuid), true)).bounds(width - 20 - 5, height - 20 - 5, 20, 20).tooltip(Tooltip.create(Component.literal("Open " + playerProfile.targetName + "'s NameMC page"))).build());
 
         addRenderableWidget(Button.builder(Component.nullToEmpty("Update"), (buttonWidget) -> VTiersClient.showUpdatedPlayerProfile(playerProfile, true)).bounds(5, height - 20 - 5, 68, 20).tooltip(Tooltip.create(Component.nullToEmpty("Reload the player profile"))).build());
         addRenderableWidget(Button.builder(Icons.CYCLE, (buttonWidget) -> playerProfile.updateTierlistProfiles(2)).bounds(5, height - 20 - 5 - 22, 20, 20).tooltip(Tooltip.create(Component.literal(("Update VNList results")))).build());
