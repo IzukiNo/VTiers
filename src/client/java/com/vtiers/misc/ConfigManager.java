@@ -82,11 +82,11 @@ public class ConfigManager {
                 if (upgradeAdjustmentDone)
                     return;
 
-                if (minecraftClient.screen instanceof TitleScreen) {
+                if (minecraftClient.gui.screen() instanceof TitleScreen) {
                     launchTickCounter++;
 
                     if (launchTickCounter >= 20) {
-                        minecraftClient.getToastManager().addToast(SystemToast.multiline(minecraftClient, SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.nullToEmpty("Thanks for updating VTiers"), Component.nullToEmpty("Some settings may have changed")));
+                        SystemToast.add(minecraftClient.gui.toastManager(), SystemToast.SystemToastId.NARRATOR_TOGGLE, Component.nullToEmpty("Thanks for updating VTiers"), Component.nullToEmpty("Some settings may have changed"));
                         VTiersClient.toggleMod = true;
                         VTiersClient.toggleIcons = true;
                         VTiersClient.toggleTab = true;

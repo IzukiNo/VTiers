@@ -364,7 +364,7 @@ public class VTiersClient implements ClientModInitializer {
     }
 
     public static void setScreen(Screen screen) {
-        Minecraft.getInstance().scheduleWithResult(ignored -> Minecraft.getInstance().setScreen(screen));
+        Minecraft.getInstance().scheduleWithResult(ignored -> Minecraft.getInstance().gui.setScreen(screen));
     }
 
     public static String[] getDebugInfo() {
@@ -383,7 +383,6 @@ public class VTiersClient implements ClientModInitializer {
         debugInfo[1] = debugInfo[0];
         debugInfo[1] += "Launcher brand: " + Minecraft.getLauncherBrand() + "\n";
         debugInfo[1] += "Game version: " + Minecraft.getInstance().getLaunchedVersion() + " | " + FabricLoader.getInstance().getRawGameVersion() + "\n";
-        debugInfo[1] += "Version type: " + Minecraft.getInstance().getVersionType() + "\n";
         debugInfo[1] += "Instance name: " + Minecraft.getInstance().name() + "\n";
         debugInfo[1] += "Game profile name: " + Minecraft.getInstance().getGameProfile().name() + "\n";
         debugInfo[1] += "OS info:\n\t" + System.getProperty("os.name") + "\n\t" + System.getProperty("os.version") + "\n\t" + System.getProperty("os.arch") + "\n";
@@ -391,7 +390,7 @@ public class VTiersClient implements ClientModInitializer {
         Runtime runtime = Runtime.getRuntime();
         debugInfo[1] += "RAM info (MB):\n\tMax: " + runtime.maxMemory() / (1024 * 1024) + "\n\tTotal: " + runtime.totalMemory() / (1024 * 1024) + "\n\tFree: " + runtime.freeMemory() / (1024 * 1024) + "\n\tIn use: " + (runtime.totalMemory() - runtime.freeMemory()) / (1024 * 1024) + "\n";
         GpuDevice gpuDevice = RenderSystem.getDevice();
-        debugInfo[1] += "GPU info:\n\t" + gpuDevice.getBackendName() + "\n\t" + gpuDevice.getImplementationInformation() + "\n\t" + gpuDevice.getRenderer() + "\n\t" + gpuDevice.getVersion() + "\n";
+        debugInfo[1] += "GPU info:\n\t" + gpuDevice.getDeviceInfo().backendName() + "\n\t" + gpuDevice.getDeviceInfo().vendorName() + "\n\t" + gpuDevice.getDeviceInfo().name() + "\n\t" + gpuDevice.getDeviceInfo().driverInfo() + "\n";
         debugInfo[1] += "Java version: " + System.getProperty("java.version") + "\n";
         debugInfo[1] += "Launch args: " + Arrays.toString(FabricLoader.getInstance().getLaunchArguments(true)) + "\n";
         debugInfo[1] += "All Fabric mods: " + FabricLoader.getInstance().getAllMods() + "\n";

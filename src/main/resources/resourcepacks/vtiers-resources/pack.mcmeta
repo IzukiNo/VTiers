@@ -2,8 +2,8 @@
   "pack": {
     "pack_format": 29,
     "description": "Icons and colors for VTiers",
-    "supported_formats": [29, 75],
+    "supported_formats": [29, 88],
     "min_format": 29,
-    "max_format": 75
+    "max_format": 88
   }
 }
